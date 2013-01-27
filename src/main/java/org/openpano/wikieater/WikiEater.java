@@ -12,8 +12,8 @@ import org.openpano.wikieater.tools.StripUtils;
  */
 public class WikiEater {
 
-	private static final String directoryCache = "./files/cache";
-	private static final String directoryOutput = "./files/output";
+	private final String directoryCache = "./files/cache";
+	private final String directoryOutput = "./files/output";
 
 	private final FileUtils fileUtils = new FileUtils();
 	private final StripUtils stripUtils = new StripUtils();
@@ -36,10 +36,11 @@ public class WikiEater {
 
 	public static void main(String[] args) {
 
-		new File(WikiEater.directoryCache).mkdir();
-		new File(WikiEater.directoryOutput).mkdir();
-
 		WikiEater wikiEater = new WikiEater();
+
+		new File(wikiEater.directoryCache).mkdir();
+		new File(wikiEater.directoryOutput).mkdir();
+
 		try {
 			wikiEater.processLinks();
 		} catch (IOException e) {

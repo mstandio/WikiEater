@@ -22,7 +22,6 @@ public class FileUtilsTest {
 	File cacheFolder;
 	File file1;
 	File file2;
-	File file3;
 
 	@Rule
 	public TemporaryFolder testFolder = new TemporaryFolder();
@@ -69,7 +68,7 @@ public class FileUtilsTest {
 
 	@Test
 	public void saveToCacheTest() throws Exception {
-		final String sampleUrl = "sampleUrl";
+		final String sampleUrl = "http://file3";
 		final String sampleContent = "sampleContent";
 
 		File tmpFile3 = testFolder.newFile("file3");

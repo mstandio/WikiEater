@@ -1,6 +1,6 @@
-WikiEater is a simple project for ripping and reformating content from selected MediaWiki articles.
-Project is intended to be used as code base for some specific tasks.         
-It is easily extendable, it features caching html pages and formatting html output.
+WikiEater is a simple project for ripping and reformating content from selected MediaWiki articles.  
+Project is intended to be used as code base for some specific tasks.  
+It is easily extendable, it features caching html pages and formatting html output.  
 	
 Usage:
 * paste urls of wiki pages into links.txt one url per line
