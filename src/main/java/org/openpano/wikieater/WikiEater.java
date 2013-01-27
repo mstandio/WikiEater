@@ -12,16 +12,19 @@ import org.openpano.wikieater.tools.StripUtils;
  */
 public class WikiEater {
 
+	private static final String directoryCache = "./files/cache";
+	private static final String directoryOutput = "./files/output";
+
 	private final FileUtils fileUtils = new FileUtils();
 	private final StripUtils stripUtils = new StripUtils();
 
 	void processLinks() throws IOException {
 		final File linksFile = new File("./files/links.txt");
-		final File cacheFolder = new File("./files/cache");
+		final File cacheFolder = new File(directoryCache);
 		List<String> links = fileUtils.readLinks(linksFile);
 		for (String link : links) {
 			String strippedContent = stripUrlContent(fileUtils.getUrlContent(link, cacheFolder));
-			File htmlFile = new File("./files/output/" + fileUtils.makeHtmlFileName(link) + ".html");
+			File htmlFile = new File(directoryOutput + "/" + fileUtils.makeHtmlFileName(link) + ".html");
 			fileUtils.saveAsHtmlFile(htmlFile, strippedContent);
 		}
 	}
@@ -32,10 +35,10 @@ public class WikiEater {
 	}
 
 	public static void main(String[] args) {
-		
-		new File(".files/cache").mkdir();
-		new File(".files/output").mkdir();
-		
+
+		new File(WikiEater.directoryCache).mkdir();
+		new File(WikiEater.directoryOutput).mkdir();
+
 		WikiEater wikiEater = new WikiEater();
 		try {
 			wikiEater.processLinks();
