@@ -1,0 +1,4 @@
+WikiEater
+=========
+
+Simple MediaWiki ripper
