@@ -32,6 +32,10 @@ public class WikiEater {
 	}
 
 	public static void main(String[] args) {
+		
+		new File(".files/cache").mkdir();
+		new File(".files/output").mkdir();
+		
 		WikiEater wikiEater = new WikiEater();
 		try {
 			wikiEater.processLinks();

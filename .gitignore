@@ -1,3 +1,5 @@
 
 /target
 /.settings
+/files/output
+/files/cache
