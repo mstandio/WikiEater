@@ -16,6 +16,8 @@ import org.openpano.wikieater.tools.UrlUtils;
 public class WikiEater {
 
 	private final String directoryCache = "./files/cache";
+	private final String directoryCacheResources = "./files/cache/resources";
+	private final String directoryCacheResourcesCss = "./files/cache/resources/css";
 	private final String directoryOutput = "./files/output";
 
 	private final FileUtils fileUtils = new FileUtils();
@@ -29,8 +31,11 @@ public class WikiEater {
 		List<PageData> pagesData = new ArrayList<PageData>();
 
 		for (String link : links) {
-			String strippedPageContent = stripUtils.stripPageContent(fileUtils.getUrlContent(link, cacheFolder));
-			pagesData.add(new PageData(link, fileUtils.makeHtmlFileName(link), strippedPageContent));
+			pagesData.add(new PageData(link, fileUtils.makeHtmlFileName(link), fileUtils.getUrlContent(link, cacheFolder)));			
+		}
+		
+		for (PageData pageData : pagesData) {
+			pageData.setPageContent(stripUtils.stripPageContent(pageData.getPageContent()));
 		}
 
 		urlUtils.replacePageUrls(pagesData);
@@ -46,6 +51,8 @@ public class WikiEater {
 		WikiEater wikiEater = new WikiEater();
 
 		new File(wikiEater.directoryCache).mkdir();
+		new File(wikiEater.directoryCacheResources).mkdir();
+		new File(wikiEater.directoryCacheResourcesCss).mkdir();
 		new File(wikiEater.directoryOutput).mkdir();
 
 		try {

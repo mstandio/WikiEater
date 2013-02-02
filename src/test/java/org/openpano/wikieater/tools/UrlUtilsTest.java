@@ -63,11 +63,11 @@ public class UrlUtilsTest {
 
 	@Test
 	public void findHrefReplacementTest() throws Exception {
-		pagesData.add(new PageData("http://a", "a.html", ""));
-		pagesData.add(new PageData("http://b", "b.html", ""));
+		pagesData.add(new PageData("http://x/a", "a.html", ""));
+		pagesData.add(new PageData("http://x/b", "b.html", ""));
 
-		assertEquals("a.html", urlUtils.findHrefPageReplacement("a", pagesData));
-		assertEquals("c", urlUtils.findHrefPageReplacement("c", pagesData));
+		assertEquals("a.html", urlUtils.findHrefPageReplacement("/a", pagesData));
+		assertEquals("/c", urlUtils.findHrefPageReplacement("/c", pagesData));
 	}
 
 	@Test
