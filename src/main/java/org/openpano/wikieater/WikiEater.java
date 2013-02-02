@@ -2,10 +2,13 @@ package org.openpano.wikieater;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.openpano.wikieater.data.PageData;
 import org.openpano.wikieater.tools.FileUtils;
 import org.openpano.wikieater.tools.StripUtils;
+import org.openpano.wikieater.tools.UrlUtils;
 
 /**
  * @author mstandio
@@ -17,22 +20,26 @@ public class WikiEater {
 
 	private final FileUtils fileUtils = new FileUtils();
 	private final StripUtils stripUtils = new StripUtils();
+	private final UrlUtils urlUtils = new UrlUtils();
 
 	void processLinks() throws IOException {
 		final File linksFile = new File("./files/links.txt");
 		final File cacheFolder = new File(directoryCache);
 		List<String> links = fileUtils.readLinks(linksFile);
-		for (String link : links) {
-			String strippedContent = stripUrlContent(fileUtils.getUrlContent(link, cacheFolder));
-			File htmlFile = new File(directoryOutput + "/" + fileUtils.makeHtmlFileName(link) + ".html");
-			fileUtils.saveAsHtmlFile(htmlFile, strippedContent);
-		}
-	}
+		List<PageData> pagesData = new ArrayList<PageData>();
 
-	String stripUrlContent(String urlContent) {
-		// return stripUtils.stripDocType(urlContent);
-		return urlContent;
-	}
+		for (String link : links) {
+			String strippedPageContent = stripUtils.stripPageContent(fileUtils.getUrlContent(link, cacheFolder));
+			pagesData.add(new PageData(link, fileUtils.makeHtmlFileName(link), strippedPageContent));
+		}
+
+		urlUtils.replacePageUrls(pagesData);
+
+		for (PageData pageData : pagesData) {
+			File htmlFile = new File(directoryOutput + "/" + pageData.getHtmlFileName());
+			fileUtils.saveAsHtmlFile(htmlFile, pageData.getPageContent());
+		}
+	}	
 
 	public static void main(String[] args) {
 

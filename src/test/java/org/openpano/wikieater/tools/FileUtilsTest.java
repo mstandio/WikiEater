@@ -62,8 +62,14 @@ public class FileUtilsTest {
 
 	@Test
 	public void makeCacheFileNameTest() throws Exception {
-		assertEquals("module_imagegallery",
-				fileUtils.makeCacheFileName("http://panozona.com/wiki/Module:ImageGallery#group"));
+		assertEquals("module_image-gallery",
+				fileUtils.makeCacheFileName("http://panozona.com/wiki/Module:Image_Gallery#group"));
+	}
+	
+	@Test
+	public void removeNamedAnchorFromUrlTest() throws Exception {
+		assertEquals("http://panozona.com/wiki/Module:ImageGallery",
+				fileUtils.removeNamedAnchorFromUrl("http://panozona.com/wiki/Module:ImageGallery#group"));
 	}
 
 	@Test

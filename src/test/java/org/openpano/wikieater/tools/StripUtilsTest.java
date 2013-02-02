@@ -1,5 +1,6 @@
 package org.openpano.wikieater.tools;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -7,8 +8,15 @@ import org.junit.Test;
  */
 public class StripUtilsTest {
 
+	StripUtils stripUtils;
+
+	@Before
+	public void setUp() throws Exception {
+		stripUtils = new StripUtils();
+	}
+
 	@Test
-	public void fakeTest() {
+	public void stripPageContentTest() {
 
 	}
 }

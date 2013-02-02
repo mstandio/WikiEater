@@ -56,7 +56,7 @@ public class FileUtils {
 			while ((line = bufferedReader.readLine()) != null) {
 				line = line.trim();
 				if (!line.isEmpty() && !line.startsWith("#")) {
-					links.add(line);
+					links.add(removeNamedAnchorFromUrl(line));
 				}
 			}
 		} finally {
@@ -129,15 +129,20 @@ public class FileUtils {
 
 	String makeCacheFileName(String url) {
 		String fileName = url.toLowerCase();
-		fileName.replaceAll("_", "-");
+		fileName = removeNamedAnchorFromUrl(fileName);
+		fileName = fileName.replaceAll("_", "-");
 		if (url.contains("/")) {
 			fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
 		}
-		if (fileName.contains("#")) {
-			fileName = fileName.substring(0, fileName.indexOf("#"));
-		}
 		fileName = fileName.replaceAll(":", "_");
 		return fileName;
+	}
+
+	String removeNamedAnchorFromUrl(String url) {
+		if (url.contains("#")) {
+			url = url.substring(0, url.indexOf("#"));
+		}
+		return url;
 	}
 
 	void saveToCache(File cacheFile, String url, String urlContent) throws IOException {
@@ -155,7 +160,7 @@ public class FileUtils {
 	}
 
 	public String makeHtmlFileName(String url) {
-		return makeCacheFileName(url); // TODO
+		return makeCacheFileName(url) + ".html";
 	}
 
 	public void saveAsHtmlFile(File htmlFile, String fileContent) throws IOException {

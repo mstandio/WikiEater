@@ -1,19 +1,23 @@
 package org.openpano.wikieater.tools;
 
 /**
- * @author MSt
+ * @author mstandio
  */
 public class StripUtils {
 
-	public String stripDocType(String urlContent) {
+	public String stripPageContent(String pageContent) {
+		return pageContent;
+	}
+
+	String stripDocType(String urlContent) {
 		return urlContent.substring(urlContent.indexOf(">") + 1, urlContent.length());
 	}
 
-	public String stripNavigation(String urlContent) {
+	String stripNavigation(String urlContent) {
 		return null;
 	}
 
-	public String stripFooter(String urlContent) {
+	String stripFooter(String urlContent) {
 		return null;
 	}
 }
