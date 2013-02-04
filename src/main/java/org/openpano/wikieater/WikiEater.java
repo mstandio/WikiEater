@@ -27,9 +27,9 @@ public class WikiEater {
 	private final String directoryCacheResourcesCss = "./files/cache/resources/css";
 	private final String directoryCacheResourcesImages = "./files/cache/resources/images";
 	private final String directoryOutput = "./files/output";
-	private final String directoryOutputResources = "./files/output/Resources";
-	private final String directoryOutputResourcesCss = "./files/output/Resources/css";
-	private final String directoryOutputResourcesImages = "./files/output/Resources/images";
+	private final String directoryOutputResources = "./files/output/resources";
+	private final String directoryOutputResourcesCss = "./files/output/resources/css";
+	private final String directoryOutputResourcesImages = "./files/output/resources/images";
 
 	private final FileUtils fileUtils = new FileUtils();
 	private final CssUtils cssUtils = new CssUtils();
@@ -62,6 +62,12 @@ public class WikiEater {
 			cssDataSet.addAll(cssUtils.extractCssData(cssUtils.extractEmbededCss(pageData.getPageContent())));
 		}
 
+		// strip pages
+
+		for (PageData pageData : pageDataList) {
+			pageData.setPageContent(stripUtils.stripPageContent(pageData.getPageContent()));
+		}
+
 		// read images
 
 		Set<String> imageUrls = imageUtils.harvestImageUrls(pageDataList);
@@ -74,15 +80,13 @@ public class WikiEater {
 
 		// rework pages
 
-		for (PageData pageData : pageDataList) {
-			pageData.setPageContent(stripUtils.stripPageContent(pageData.getPageContent()));
-		}
 		urlUtils.replacePageUrls(pageDataList);
-		urlUtils.replaceImageUrls(pageDataList, ImageDataSet, directoryOutputResourcesImages);
+		urlUtils.replaceImageUrls(pageDataList, ImageDataSet, "resources/images");
+		
 
 		// save data
 
-		for (PageData pageData : pageDataList) {			
+		for (PageData pageData : pageDataList) {
 			fileUtils.saveAsHtmlFile(pageData, directoryOutput);
 		}
 		for (ImageData imageData : ImageDataSet) {

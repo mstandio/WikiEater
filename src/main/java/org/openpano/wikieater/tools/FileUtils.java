@@ -50,7 +50,7 @@ public class FileUtils {
 		if (cachedUrls.contains(url)) {
 			File[] cacheFiles = cacheFolder.listFiles();
 			for (File cacheFile : cacheFiles) {
-				if (cacheFile.getName().equals(cacheFileName)) {
+				if (cacheFile.isFile() && cacheFile.getName().equals(cacheFileName)) {
 					return getCacheRemainingLines(cacheFile);
 				}
 			}
@@ -118,7 +118,9 @@ public class FileUtils {
 		final Set<String> firstLines = new HashSet<String>();
 		File[] cacheFiles = cacheFolder.listFiles();
 		for (File cacheFile : cacheFiles) {
-			firstLines.add(getCacheFirstLine(cacheFile));
+			if (cacheFile.isFile()) {
+				firstLines.add(getCacheFirstLine(cacheFile));
+			}
 		}
 		return firstLines;
 	}
@@ -270,7 +272,7 @@ public class FileUtils {
 		OutputStream outStream = null;
 		try {
 			inStream = new FileInputStream(file);
-			outStream = new FileOutputStream(new File(targetDirectory));
+			outStream = new FileOutputStream(new File(new File(targetDirectory), file.getName()));
 			byte[] buffer = new byte[1024];
 			int length;
 			while ((length = inStream.read(buffer)) > 0) {

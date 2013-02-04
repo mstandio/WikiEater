@@ -17,6 +17,7 @@ public abstract class MediaUtils {
 	}
 
 	String makeMediaUrl(String mediaLink, String pageUrl) {
+		mediaLink = mediaLink.replaceAll("&amp;", "&");
 		if (mediaLink.matches("http(s)?://.+")) {
 			return mediaLink;
 		} else {
