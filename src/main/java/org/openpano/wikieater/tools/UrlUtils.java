@@ -11,9 +11,9 @@ import org.openpano.wikieater.data.PageData;
  */
 public class UrlUtils {
 
-	public void replacePageUrls(List<PageData> pagesData) {
-		HrefReplacer hrefPageReplacer = new HrefPageReplacer(pagesData);
-		for (PageData pageData : pagesData) {
+	public void replacePageUrls(List<PageData> pageDataList) {
+		HrefReplacer hrefPageReplacer = new HrefPageReplacer(pageDataList);
+		for (PageData pageData : pageDataList) {
 			pageData.setPageContent(replacePageContentHrefs(pageData.getPageContent(), hrefPageReplacer));
 		}
 	}
@@ -31,8 +31,8 @@ public class UrlUtils {
 		return stringBuffer.toString();
 	}
 
-	String findHrefPageReplacement(String href, List<PageData> pagesData) {
-		for (PageData pageData : pagesData) {
+	String findHrefPageReplacement(String href, List<PageData> pageDataList) {
+		for (PageData pageData : pageDataList) {
 			if (pageUrlMatchesHref(pageData.getPageUrl(), href)) {
 				return translateHtmlFileNameToHref(pageData.getHtmlFileName(), href);
 			}
@@ -58,15 +58,15 @@ public class UrlUtils {
 
 	class HrefPageReplacer implements HrefReplacer {
 
-		private final List<PageData> pagesData;
+		private final List<PageData> pageDataList;
 
-		public HrefPageReplacer(List<PageData> pagesData) {
-			this.pagesData = pagesData;
+		public HrefPageReplacer(List<PageData> pageDataList) {
+			this.pageDataList = pageDataList;
 		}
 
 		@Override
 		public String getReplacement(String href) {
-			return findHrefPageReplacement(href, pagesData);
+			return findHrefPageReplacement(href, pageDataList);
 		}
 	}
 

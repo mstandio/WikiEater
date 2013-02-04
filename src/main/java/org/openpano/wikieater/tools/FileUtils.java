@@ -10,8 +10,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,14 +23,25 @@ import org.slf4j.LoggerFactory;
  */
 public class FileUtils {
 
+	public enum FileType {
+		HTML, CSS
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
 	private static final String ENC = "UTF-8";
 
-	public String getUrlContent(String url, File cacheFolder) throws IOException {
+	public String getUrlContent(String url, File cacheFolder, FileType fileType) throws IOException {
 		url = url.trim();
-		String cacheFileName = makeCacheFileName(url);
-		List<String> cachedUrls = listCachedUrls(cacheFolder);
+		String cacheFileName = null;
+		if (FileType.HTML.equals(fileType)) {
+			cacheFileName = makeHtmlCacheFileName(url);
+		} else if (FileType.CSS.equals(fileType)) {
+			cacheFileName = makeCssCacheFileName(url);
+		} else {
+			throw new RuntimeException("Unsupported fileType: " + fileType);
+		}
+		Set<String> cachedUrls = listCachedUrls(cacheFolder);
 		if (cachedUrls.contains(url)) {
 			File[] cacheFiles = cacheFolder.listFiles();
 			for (File cacheFile : cacheFiles) {
@@ -46,17 +59,17 @@ public class FileUtils {
 		}
 	}
 
-	public List<String> readLinks(File linksFile) throws IOException {
-		List<String> links = new ArrayList<String>();
+	public Set<String> readUrls(File urlsFile) throws IOException {
+		Set<String> urls = new HashSet<String>();
 		BufferedReader bufferedReader = null;
 		try {
-			bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(linksFile),
+			bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(urlsFile),
 					Charset.forName(ENC)));
 			String line = null;
 			while ((line = bufferedReader.readLine()) != null) {
 				line = line.trim();
 				if (!line.isEmpty() && !line.startsWith("#")) {
-					links.add(removeNamedAnchorFromUrl(line));
+					urls.add(removeNamedAnchorFromUrl(line));
 				}
 			}
 		} finally {
@@ -64,12 +77,12 @@ public class FileUtils {
 				bufferedReader.close();
 			}
 		}
-		logger.info("Found {} links in file '{}'", links.size(), linksFile.getName());
-		return links;
+		logger.info("Found {} urls in file '{}'", urls.size(), urlsFile.getName());
+		return urls;
 	}
 
-	List<String> listCachedUrls(File cacheFolder) throws IOException {
-		final List<String> firstLines = new ArrayList<String>();
+	Set<String> listCachedUrls(File cacheFolder) throws IOException {
+		final Set<String> firstLines = new HashSet<String>();
 		File[] cacheFiles = cacheFolder.listFiles();
 		for (File cacheFile : cacheFiles) {
 			firstLines.add(getCacheFirstLine(cacheFile));
@@ -127,7 +140,7 @@ public class FileUtils {
 		return stringBuilder.toString();
 	}
 
-	String makeCacheFileName(String url) {
+	String makeHtmlCacheFileName(String url) {
 		String fileName = url.toLowerCase();
 		fileName = removeNamedAnchorFromUrl(fileName);
 		fileName = fileName.replaceAll("_", "-");
@@ -145,6 +158,21 @@ public class FileUtils {
 		return url;
 	}
 
+	String makeCssCacheFileName(String url) {
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(url.getBytes());
+			byte[] digest = md.digest();
+			StringBuffer stringBuffer = new StringBuffer();
+			for (byte b : digest) {
+				stringBuffer.append(Integer.toHexString((int) (b & 0xff)));
+			}
+			return stringBuffer.toString();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	void saveToCache(File cacheFile, String url, String urlContent) throws IOException {
 		BufferedWriter bufferedWriter = null;
 		try {
@@ -160,7 +188,7 @@ public class FileUtils {
 	}
 
 	public String makeHtmlFileName(String url) {
-		return makeCacheFileName(url) + ".html";
+		return makeHtmlCacheFileName(url) + ".html";
 	}
 
 	public void saveAsHtmlFile(File htmlFile, String fileContent) throws IOException {

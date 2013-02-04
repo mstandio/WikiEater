@@ -18,12 +18,12 @@ import org.openpano.wikieater.tools.UrlUtils.HrefReplacer;
 public class UrlUtilsTest {
 
 	UrlUtils urlUtils;
-	List<PageData> pagesData;
+	List<PageData> pageDataList;
 
 	@Before
 	public void setUp() throws Exception {
 		urlUtils = new UrlUtils();
-		pagesData = new ArrayList<PageData>();
+		pageDataList = new ArrayList<PageData>();
 	}
 
 	@Test
@@ -63,11 +63,11 @@ public class UrlUtilsTest {
 
 	@Test
 	public void findHrefReplacementTest() throws Exception {
-		pagesData.add(new PageData("http://x/a", "a.html", ""));
-		pagesData.add(new PageData("http://x/b", "b.html", ""));
+		pageDataList.add(new PageData("http://x/a", "a.html", ""));
+		pageDataList.add(new PageData("http://x/b", "b.html", ""));
 
-		assertEquals("a.html", urlUtils.findHrefPageReplacement("/a", pagesData));
-		assertEquals("/c", urlUtils.findHrefPageReplacement("/c", pagesData));
+		assertEquals("a.html", urlUtils.findHrefPageReplacement("/a", pageDataList));
+		assertEquals("/c", urlUtils.findHrefPageReplacement("/c", pageDataList));
 	}
 
 	@Test
@@ -91,12 +91,12 @@ public class UrlUtilsTest {
 
 	@Test
 	public void replacePageUrlsTest() throws Exception {
-		pagesData.add(new PageData("http://x/y/z/a", "a.html", "<a href=\"/z/b\">"));
-		pagesData.add(new PageData("http://x/y/z/b", "b.html", "<a href=\"/z/a#c\">"));
+		pageDataList.add(new PageData("http://x/y/z/a", "a.html", "<a href=\"/z/b\">"));
+		pageDataList.add(new PageData("http://x/y/z/b", "b.html", "<a href=\"/z/a#c\">"));
 
-		urlUtils.replacePageUrls(pagesData);
+		urlUtils.replacePageUrls(pageDataList);
 
-		assertEquals("<a href=\"b.html\">", pagesData.get(0).getPageContent());
-		assertEquals("<a href=\"a.html#c\">", pagesData.get(1).getPageContent());
+		assertEquals("<a href=\"b.html\">", pageDataList.get(0).getPageContent());
+		assertEquals("<a href=\"a.html#c\">", pageDataList.get(1).getPageContent());
 	}
 }

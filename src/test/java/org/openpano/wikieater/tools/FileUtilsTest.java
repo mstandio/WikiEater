@@ -6,12 +6,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.openpano.wikieater.tools.FileUtils.FileType;
 
 /**
  * @author mstandio
@@ -54,18 +55,23 @@ public class FileUtilsTest {
 
 	@Test
 	public void listCachedUrlsTest() throws Exception {
-		List<String> cachedUrls = fileUtils.listCachedUrls(cacheFolder);
-		assertEquals(2, cachedUrls.size());
-		assertTrue(cachedUrls.get(0).matches(".*file1.*"));
-		assertTrue(cachedUrls.get(1).matches(".*file2.*"));
+		Set<String> cachedUrls = fileUtils.listCachedUrls(cacheFolder);
+		assertEquals(2, cachedUrls.size());		
+		assertTrue(cachedUrls.contains("file1 first line"));
+		assertTrue(cachedUrls.contains("file2 first line"));
 	}
 
 	@Test
-	public void makeCacheFileNameTest() throws Exception {
+	public void makeHtmlCacheFileNameTest() throws Exception {
 		assertEquals("module_image-gallery",
-				fileUtils.makeCacheFileName("http://panozona.com/wiki/Module:Image_Gallery#group"));
+				fileUtils.makeHtmlCacheFileName("http://panozona.com/wiki/Module:Image_Gallery#group"));
 	}
-	
+
+	@Test
+	public void makeCssCacheFileNameTest() throws Exception {
+		assertEquals(fileUtils.makeCssCacheFileName("XYZ"), fileUtils.makeCssCacheFileName("XYZ"));
+	}
+
 	@Test
 	public void removeNamedAnchorFromUrlTest() throws Exception {
 		assertEquals("http://panozona.com/wiki/Module:ImageGallery",
@@ -93,7 +99,7 @@ public class FileUtilsTest {
 		File tmpFile4 = testFolder.newFile("file4");
 		fileUtils.saveToCache(tmpFile4, sampleUrl, sampleContent);
 
-		assertEquals(sampleContent, fileUtils.getUrlContent(sampleUrl, testFolder.getRoot()));
+		assertEquals(sampleContent, fileUtils.getUrlContent(sampleUrl, testFolder.getRoot(), FileType.HTML));
 	}
 
 	@Test
@@ -103,7 +109,7 @@ public class FileUtilsTest {
 
 		FileUtilsMock fileUtilsMock = new FileUtilsMock(sampleContent);
 
-		assertEquals(sampleContent, fileUtilsMock.getUrlContent(sampleUrl, testFolder.getRoot()));
+		assertEquals(sampleContent, fileUtilsMock.getUrlContent(sampleUrl, testFolder.getRoot(), FileType.HTML));
 	}
 
 	private class FileUtilsMock extends FileUtils {
@@ -121,20 +127,20 @@ public class FileUtilsTest {
 	}
 
 	@Test
-	public void readLinksTest() throws IOException {
-		File fileLinks = new File(this.getClass().getResource("/links.txt").getFile());
-		assertTrue(fileLinks.exists());
+	public void readUrlsTest() throws IOException {
+		File fileUrls = new File(this.getClass().getResource("/links.txt").getFile());
+		assertTrue(fileUrls.exists());
 
-		List<String> links = fileUtils.readLinks(fileLinks);
+		Set<String> urls = fileUtils.readUrls(fileUrls);
 
-		assertEquals(2, links.size());
-		assertEquals(links.get(0), "link1");
-		assertEquals(links.get(1), "link2");
+		assertEquals(2, urls.size());		
+		assertTrue(urls.contains("link1"));
+		assertTrue(urls.contains("link2"));
 	}
 
 	@Test
 	public void makeHtmlFileNameTest() throws Exception {
 		assertEquals("module_imagegallery",
-				fileUtils.makeCacheFileName("http://panozona.com/wiki/Module:ImageGallery#group"));
+				fileUtils.makeHtmlCacheFileName("http://panozona.com/wiki/Module:ImageGallery#group"));
 	}
 }
