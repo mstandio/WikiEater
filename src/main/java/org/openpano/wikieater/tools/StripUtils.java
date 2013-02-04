@@ -13,7 +13,7 @@ public class StripUtils {
 	}
 
 	String extractDivFromPageContent(String pageContent, String divName) {
-		String patternTagOpen = "<div[^>]*?>";
+		String patternTagOpen = "<div[^>]*>";
 		String patternTagClose = "</div>";
 		Pattern pattern = Pattern.compile(patternTagOpen + "|" + patternTagClose, Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(pageContent);
@@ -47,7 +47,7 @@ public class StripUtils {
 	}
 
 	String removeElementsFromPageContent(String pageContent, ElementType elementType, String elementName) {
-		String patternTagOpen = "<" + elementType.name() + "[^>/]*?>";
+		String patternTagOpen = "<" + elementType.name() + "[^>/]*>";
 		String patternTagClose = "</" + elementType.name() + ">";
 
 		Pattern pattern = Pattern.compile(patternTagOpen + "|" + patternTagClose, Pattern.CASE_INSENSITIVE);

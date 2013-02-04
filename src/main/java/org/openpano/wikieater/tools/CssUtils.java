@@ -23,7 +23,7 @@ public class CssUtils {
 	}
 
 	public String extractEmbededCss(String pageContent) {
-		String patternTagOpen = "<style[^>]*?>";
+		String patternTagOpen = "<style[^>]*>";
 		String patternTagClose = "</style>";
 		Pattern pattern = Pattern.compile(patternTagOpen + "|" + patternTagClose, Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(pageContent);
