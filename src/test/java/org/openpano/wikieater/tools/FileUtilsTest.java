@@ -56,7 +56,7 @@ public class FileUtilsTest {
 	@Test
 	public void listCachedUrlsTest() throws Exception {
 		Set<String> cachedUrls = fileUtils.listCachedUrls(cacheFolder);
-		assertEquals(2, cachedUrls.size());		
+		assertEquals(2, cachedUrls.size());
 		assertTrue(cachedUrls.contains("file1 first line"));
 		assertTrue(cachedUrls.contains("file2 first line"));
 	}
@@ -70,6 +70,12 @@ public class FileUtilsTest {
 	@Test
 	public void makeCssCacheFileNameTest() throws Exception {
 		assertEquals(fileUtils.makeCssCacheFileName("XYZ"), fileUtils.makeCssCacheFileName("XYZ"));
+	}
+
+	@Test
+	public void makeImageCacheFileNameTest() throws Exception {
+		assertEquals("image.png",
+				fileUtils.makeHtmlCacheFileName("http://panozona.com/wiki/file/image.png"));
 	}
 
 	@Test
@@ -133,7 +139,7 @@ public class FileUtilsTest {
 
 		Set<String> urls = fileUtils.readUrls(fileUrls);
 
-		assertEquals(2, urls.size());		
+		assertEquals(2, urls.size());
 		assertTrue(urls.contains("link1"));
 		assertTrue(urls.contains("link2"));
 	}

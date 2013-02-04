@@ -5,10 +5,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openpano.wikieater.data.ImageData;
 import org.openpano.wikieater.data.PageData;
 import org.openpano.wikieater.tools.UrlUtils.HrefReplacer;
 
@@ -19,11 +22,13 @@ public class UrlUtilsTest {
 
 	UrlUtils urlUtils;
 	List<PageData> pageDataList;
+	Set<ImageData> imageDataSet;
 
 	@Before
 	public void setUp() throws Exception {
 		urlUtils = new UrlUtils();
 		pageDataList = new ArrayList<PageData>();
+		imageDataSet = new HashSet<ImageData>();
 	}
 
 	@Test
@@ -62,7 +67,7 @@ public class UrlUtilsTest {
 	}
 
 	@Test
-	public void findHrefReplacementTest() throws Exception {
+	public void findHrefPageReplacementTest() throws Exception {
 		pageDataList.add(new PageData("http://x/a", "a.html", ""));
 		pageDataList.add(new PageData("http://x/b", "b.html", ""));
 
@@ -86,7 +91,7 @@ public class UrlUtilsTest {
 	@Test
 	public void translateHtmlFileNameToHrefTest() throws Exception {
 		assertEquals("page.html", urlUtils.translateHtmlFileNameToHref("page.html", "a:b"));
-		assertEquals("page.html#c", urlUtils.translateHtmlFileNameToHref("page.html", "a:b#c"));		
+		assertEquals("page.html#c", urlUtils.translateHtmlFileNameToHref("page.html", "a:b#c"));
 	}
 
 	@Test
@@ -98,5 +103,28 @@ public class UrlUtilsTest {
 
 		assertEquals("<a href=\"b.html\">", pageDataList.get(0).getPageContent());
 		assertEquals("<a href=\"a.html#c\">", pageDataList.get(1).getPageContent());
+	}
+
+	@Test
+	public void findSrcImageReplacementTest() throws Exception {
+		imageDataSet.add(new ImageData("a.jpg", null));
+		imageDataSet.add(new ImageData("b.gif", null));
+
+		assertEquals("out/a.jpg", urlUtils.findSrcImageReplacement("/a.jpg", imageDataSet, "out"));
+		assertEquals("out/b.gif", urlUtils.findSrcImageReplacement("/b.gif", imageDataSet, "out"));
+	}
+
+	@Test
+	public void replaceImageUrlsTest() throws Exception {
+		pageDataList.add(new PageData("http://x/y/z", "", "<img src=\"/a.jpg\">"));
+		pageDataList.add(new PageData("http://x/y/z", "", "<img src=\"/b.gif\">"));
+
+		imageDataSet.add(new ImageData("a.jpg", null));
+		imageDataSet.add(new ImageData("b.gif", null));
+
+		urlUtils.replaceImageUrls(pageDataList, imageDataSet, "out");
+
+		assertEquals("<img src=\"out/a.jpg\">", pageDataList.get(0).getPageContent());
+		assertEquals("<img src=\"out/b.gif\">", pageDataList.get(1).getPageContent());
 	}
 }

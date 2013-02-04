@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,25 +24,7 @@ public class CssUtilsTest {
 	public void setUp() throws Exception {
 		cssUtils = new CssUtils();
 		pageDataList = new ArrayList<PageData>();
-	}
-
-	@Test
-	public void makeCssUrlTest() throws Exception {
-		assertEquals("http://site.com/w/file.css", cssUtils.makeCssUrl("/w/file.css", "http://site.com/wiki/some/page"));
-	}
-
-	@Test
-	public void makeCssUrlsTest() throws Exception {
-		String pageUrl = "http://site.com/wiki/some/page";
-		Set<String> cssLinks = new HashSet<String>();
-		cssLinks.add("/w/a");
-		cssLinks.add("/w/b");
-		Set<String> cssUrls = cssUtils.makeCssUrls(cssLinks, pageUrl);
-
-		assertEquals(2, cssUrls.size());
-		assertTrue(cssUrls.contains("http://site.com/w/a"));
-		assertTrue(cssUrls.contains("http://site.com/w/b"));
-	}
+	}	
 
 	@Test
 	public void extractCssLinksTest() throws Exception {

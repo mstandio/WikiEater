@@ -12,12 +12,12 @@ import org.openpano.wikieater.data.PageData;
 /**
  * @author mstandio
  */
-public class CssUtils {
+public class CssUtils extends MediaUtils{
 
 	public Set<String> harvestCssUrls(List<PageData> pageDataList) {
 		Set<String> cssUrls = new HashSet<String>();
 		for (PageData pageData : pageDataList) {
-			cssUrls.addAll(makeCssUrls(extractCssLinks(pageData.getPageContent()), pageData.getPageUrl()));
+			cssUrls.addAll(makeMediaUrls(extractCssLinks(pageData.getPageContent()), pageData.getPageUrl()));
 		}
 		return cssUrls;
 	}
@@ -70,22 +70,9 @@ public class CssUtils {
 		while (matcher.find()) {
 			Matcher matcherHref = patternHref.matcher(matcher.group());
 			if (matcherHref.find()) {
-				extractedCssLinks.add(matcherHref.group());
+				extractedCssLinks.add(matcherHref.group().trim());
 			}
 		}
 		return extractedCssLinks;
-	}
-
-	Set<String> makeCssUrls(Set<String> cssLinks, String pageUrl) {
-		Set<String> CssUrls = new HashSet<String>();
-		for (String cssLink : cssLinks) {
-			CssUrls.add(makeCssUrl(cssLink, pageUrl));
-		}
-		return CssUrls;
-	}
-
-	String makeCssUrl(String cssLink, String pageUrl) {
-		String disassembledUrl[] = pageUrl.split("/");
-		return disassembledUrl[0] + disassembledUrl[1] + "//" + disassembledUrl[2] + cssLink;
-	}
+	}	
 }

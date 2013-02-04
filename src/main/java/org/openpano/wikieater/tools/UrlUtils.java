@@ -1,9 +1,11 @@
 package org.openpano.wikieater.tools;
 
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.openpano.wikieater.data.ImageData;
 import org.openpano.wikieater.data.PageData;
 
 /**
@@ -18,13 +20,20 @@ public class UrlUtils {
 		}
 	}
 
+	public void replaceImageUrls(List<PageData> pageDataList, Set<ImageData> imageDataSet, String outputDirectory) {
+		HrefReplacer hrefImageReplacer = new HrefImageReplacer(imageDataSet, outputDirectory);
+		for (PageData pageData : pageDataList) {
+			pageData.setPageContent(replacePageContentHrefs(pageData.getPageContent(), hrefImageReplacer));
+		}
+	}
+
 	String replacePageContentHrefs(String pageContent, HrefReplacer hrefReplacer) {
 		Pattern pattern = Pattern.compile("(?<=href=\")([^\"]+)|(?<=src=\")([^\"]+)", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(pageContent);
 		StringBuffer stringBuffer = new StringBuffer();
 		int end = 0;
 		while (matcher.find()) {
-			matcher.appendReplacement(stringBuffer, hrefReplacer.getReplacement(matcher.group()));
+			matcher.appendReplacement(stringBuffer, hrefReplacer.getReplacement(matcher.group().trim()));
 			end = matcher.end();
 		}
 		stringBuffer.append(pageContent.substring(end, pageContent.length()));
@@ -52,6 +61,15 @@ public class UrlUtils {
 		return htmlFileName;
 	}
 
+	String findSrcImageReplacement(String src, Set<ImageData> imageDataSet, String outputDirectory) {
+		for (ImageData imageData : imageDataSet) {
+			if (src.contains(imageData.getImageName())) {
+				return outputDirectory + "/" + imageData.getImageName();
+			}
+		}
+		return src;
+	}
+
 	interface HrefReplacer {
 		public String getReplacement(String href);
 	}
@@ -70,11 +88,19 @@ public class UrlUtils {
 		}
 	}
 
-	class HrefMediaReplacer implements HrefReplacer {
+	class HrefImageReplacer implements HrefReplacer {
+
+		private final Set<ImageData> imageDataSet;
+		private final String outputDirectory;
+
+		public HrefImageReplacer(Set<ImageData> imageDataSet, String outputDirectory) {
+			this.imageDataSet = imageDataSet;
+			this.outputDirectory = outputDirectory;
+		}
 
 		@Override
-		public String getReplacement(String href) {
-			throw new IllegalStateException();
+		public String getReplacement(String src) {
+			return findSrcImageReplacement(src, imageDataSet, outputDirectory);
 		}
 	}
 }

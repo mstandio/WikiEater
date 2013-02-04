@@ -6,15 +6,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.openpano.wikieater.data.PageData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public class FileUtils {
 
 	public enum FileType {
-		HTML, CSS
+		HTML, CSS, IMAGE
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
@@ -57,6 +62,34 @@ public class FileUtils {
 			saveToCache(cacheFile, url, urlContent);
 			return urlContent;
 		}
+	}
+
+	public File getUrlFile(String url, File cacheFolder, FileType fileType) throws IOException {
+		url = url.trim();
+		String cacheFileName = null;
+		if (FileType.IMAGE.equals(fileType)) {
+			cacheFileName = makeImageCacheFileName(url);
+		} else {
+			throw new RuntimeException("Unsupported fileType: " + fileType);
+		}
+		File cacheFile = new File(cacheFolder, cacheFileName);
+		if (cacheFile.exists()) {
+			return cacheFile;
+		}
+
+		URL website = new URL(url);
+		FileOutputStream fileOutputStream = null;
+		try {
+			ReadableByteChannel readableByteChannel = Channels.newChannel(website.openStream());
+			fileOutputStream = new FileOutputStream(cacheFile);
+			fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, 1 << 24);
+			fileOutputStream.close();
+		} finally {
+			if (fileOutputStream != null) {
+				fileOutputStream.close();
+			}
+		}
+		return cacheFile;
 	}
 
 	public Set<String> readUrls(File urlsFile) throws IOException {
@@ -173,6 +206,12 @@ public class FileUtils {
 		}
 	}
 
+	String makeImageCacheFileName(String url) {
+		String fileName = url.trim();
+		fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+		return fileName;
+	}
+
 	void saveToCache(File cacheFile, String url, String urlContent) throws IOException {
 		BufferedWriter bufferedWriter = null;
 		try {
@@ -191,7 +230,11 @@ public class FileUtils {
 		return makeHtmlCacheFileName(url) + ".html";
 	}
 
-	public void saveAsHtmlFile(File htmlFile, String fileContent) throws IOException {
+	public String makeImageFileName(String url) {
+		return makeImageCacheFileName(url);
+	}
+
+	public void saveAsHtmlFile(PageData pageData, String outputDirecotry) throws IOException {
 		try {
 			// too slow for now
 			// Source xmlInput = new StreamSource(new
@@ -206,17 +249,39 @@ public class FileUtils {
 			// transformer.transform(xmlInput, xmlOutput);
 			// fileContent = xmlOutput.getWriter().toString();
 		} catch (Exception e) {
-			logger.info("Could not format file '{}', cause: {}", htmlFile.getName(), e.getMessage());
+			logger.info("Could not format file '{}', cause: {}", pageData.getHtmlFileName(), e.getMessage());
 		}
 
 		BufferedWriter bufferedWriter = null;
 		try {
-			bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(htmlFile), ENC));
-			bufferedWriter.write(fileContent);
-			logger.info("Saved file '{}'", htmlFile.getName());
+			bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(new File(
+					outputDirecotry), pageData.getHtmlFileName())), ENC));
+			bufferedWriter.write(pageData.getPageContent());
+			logger.info("Saved file '{}'", pageData.getHtmlFileName());
 		} finally {
 			if (bufferedWriter != null) {
 				bufferedWriter.close();
+			}
+		}
+	}
+
+	public void copyFile(File file, String targetDirectory) throws IOException {
+		InputStream inStream = null;
+		OutputStream outStream = null;
+		try {
+			inStream = new FileInputStream(file);
+			outStream = new FileOutputStream(new File(targetDirectory));
+			byte[] buffer = new byte[1024];
+			int length;
+			while ((length = inStream.read(buffer)) > 0) {
+				outStream.write(buffer, 0, length);
+			}
+		} finally {
+			if (outStream != null) {
+				outStream.close();
+			}
+			if (inStream != null) {
+				inStream.close();
 			}
 		}
 	}
