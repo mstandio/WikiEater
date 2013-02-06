@@ -18,6 +18,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.openpano.wikieater.data.PageData;
 import org.slf4j.Logger;
@@ -56,8 +58,11 @@ public class FileUtils {
 			}
 			throw new IOException("Could not find: " + cacheFileName);
 		} else {
-			logger.info("Url '{}' was not found in cache, downloading...", url);
+			logger.info("Downloading: ", url);
 			String urlContent = readFromUrl(url);
+			if (FileType.CSS.equals(fileType)) {
+				urlContent = cleanCssContent(urlContent);
+			}
 			File cacheFile = new File(cacheFolder, cacheFileName);
 			saveToCache(cacheFile, url, urlContent);
 			return urlContent;
@@ -76,7 +81,7 @@ public class FileUtils {
 		if (cacheFile.exists()) {
 			return cacheFile;
 		}
-
+		logger.info("Downloading: '{}'", url);
 		URL website = new URL(url);
 		FileOutputStream fileOutputStream = null;
 		try {
@@ -166,6 +171,7 @@ public class FileUtils {
 			String line = null;
 			while ((line = bufferedReader.readLine()) != null) {
 				stringBuilder.append(line);
+				stringBuilder.append("\n");
 			}
 		} finally {
 			if (bufferedReader != null) {
@@ -206,6 +212,28 @@ public class FileUtils {
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	String cleanCssContent(String cssContent) {
+		String patternCommentOpen = "/\\*";
+		String patternCommentClose = "\\*/";
+		Pattern pattern = Pattern.compile(patternCommentOpen + "|" + patternCommentClose);
+		Matcher matcher = pattern.matcher(cssContent);
+		StringBuilder stringBuilder = new StringBuilder();
+		int start = 0;
+		while (matcher.find()) {
+			String group = matcher.group();
+			if (group.matches(patternCommentOpen)) {
+				stringBuilder.append(cssContent.substring(start, matcher.start()));
+			} else {
+				start = matcher.end();
+			}
+		}
+		stringBuilder.append(cssContent.substring(start, cssContent.length()));
+		cssContent = stringBuilder.toString();
+		cssContent = cssContent.replaceAll("\\s+", " ");
+		cssContent = cssContent.replaceAll("}\\s+", "}\n");
+		return cssContent;
 	}
 
 	String makeImageCacheFileName(String url) {

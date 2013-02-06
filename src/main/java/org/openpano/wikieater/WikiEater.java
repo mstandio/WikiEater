@@ -16,11 +16,15 @@ import org.openpano.wikieater.tools.FileUtils.FileType;
 import org.openpano.wikieater.tools.ImageUtils;
 import org.openpano.wikieater.tools.StripUtils;
 import org.openpano.wikieater.tools.UrlUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author mstandio
  */
 public class WikiEater {
+	
+	private static final Logger logger = LoggerFactory.getLogger(WikiEater.class);
 
 	private final String directoryCache = "./files/cache";
 	private final String directoryCacheResources = "./files/cache/resources";
@@ -39,8 +43,8 @@ public class WikiEater {
 
 	void processUrls() throws IOException {
 
-		// read pages
-
+		logger.info("Reading pages...");
+		
 		final File urlsFile = new File("./files/links.txt");
 		Set<String> pageUrls = fileUtils.readUrls(urlsFile);
 		final File cacheFolder = new File(directoryCache);
@@ -50,25 +54,25 @@ public class WikiEater {
 					pageUrl, cacheFolder, FileType.HTML)));
 		}
 
-		// read css
+		logger.info("Reading css...");
 
 		Set<String> cssUrls = cssUtils.harvestCssUrls(pageDataList);
 		final File cacheFolderCss = new File(directoryCacheResourcesCss);
 		Set<CssData> cssDataSet = new HashSet<CssData>();
-		for (String cssUrl : cssUrls) {
+		for (String cssUrl : cssUrls) {			
 			cssDataSet.addAll(cssUtils.extractCssData(fileUtils.getUrlContent(cssUrl, cacheFolderCss, FileType.CSS)));
-		}
+		}		
 		for (PageData pageData : pageDataList) {
 			cssDataSet.addAll(cssUtils.extractCssData(cssUtils.extractEmbededCss(pageData.getPageContent())));
 		}
 
-		// strip pages
+		logger.info("Stripping pages...");
 
 		for (PageData pageData : pageDataList) {
 			pageData.setPageContent(stripUtils.stripPageContent(pageData.getPageContent()));
 		}
 
-		// read images
+		logger.info("Reading images...");
 
 		Set<String> imageUrls = imageUtils.harvestImageUrls(pageDataList);
 		final File cacheFolderImages = new File(directoryCacheResourcesImages);
@@ -78,13 +82,13 @@ public class WikiEater {
 					cacheFolderImages, FileType.IMAGE)));
 		}
 
-		// rework pages
+		logger.info("Reworking pages..");
 
 		urlUtils.replacePageUrls(pageDataList);
 		urlUtils.replaceImageUrls(pageDataList, ImageDataSet, "resources/images");
 		
 
-		// save data
+		logger.info("Saving data..");
 
 		for (PageData pageData : pageDataList) {
 			fileUtils.saveAsHtmlFile(pageData, directoryOutput);
@@ -92,6 +96,8 @@ public class WikiEater {
 		for (ImageData imageData : ImageDataSet) {
 			fileUtils.copyFile(imageData.getImageFile(), directoryOutputResourcesImages);
 		}
+		
+		logger.info("Done!");
 	}
 
 	public static void main(String[] args) {

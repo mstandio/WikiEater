@@ -71,6 +71,15 @@ public class FileUtilsTest {
 	public void makeCssCacheFileNameTest() throws Exception {
 		assertEquals(fileUtils.makeCssCacheFileName("XYZ"), fileUtils.makeCssCacheFileName("XYZ"));
 	}
+	
+	@Test
+	public void cleanCssContentTest() throws Exception {
+		String cssContent = "A/*B*/C/*D*/E";
+		
+		String expectedResult= "ACE";
+		
+		assertEquals(expectedResult, fileUtils.cleanCssContent(cssContent));		
+	}
 
 	@Test
 	public void makeImageCacheFileNameTest() throws Exception {

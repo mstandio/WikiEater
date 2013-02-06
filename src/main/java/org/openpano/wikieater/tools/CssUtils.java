@@ -12,7 +12,7 @@ import org.openpano.wikieater.data.PageData;
 /**
  * @author mstandio
  */
-public class CssUtils extends MediaUtils{
+public class CssUtils extends MediaUtils {
 
 	public Set<String> harvestCssUrls(List<PageData> pageDataList) {
 		Set<String> cssUrls = new HashSet<String>();
@@ -74,5 +74,5 @@ public class CssUtils extends MediaUtils{
 			}
 		}
 		return extractedCssLinks;
-	}	
+	}
 }
