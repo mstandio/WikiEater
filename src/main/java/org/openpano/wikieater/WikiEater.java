@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * @author mstandio
  */
 public class WikiEater {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(WikiEater.class);
 
 	private final String directoryCache = "./files/cache";
@@ -44,11 +44,11 @@ public class WikiEater {
 	void processUrls() throws IOException {
 
 		logger.info("Reading pages...");
-		
+
 		final File urlsFile = new File("./files/links.txt");
-		Set<String> pageUrls = fileUtils.readUrls(urlsFile);
+		final Set<String> pageUrls = fileUtils.readUrls(urlsFile);
 		final File cacheFolder = new File(directoryCache);
-		List<PageData> pageDataList = new ArrayList<PageData>();
+		final List<PageData> pageDataList = new ArrayList<PageData>();
 		for (String pageUrl : pageUrls) {
 			pageDataList.add(new PageData(pageUrl, fileUtils.makeHtmlFileName(pageUrl), fileUtils.getUrlContent(
 					pageUrl, cacheFolder, FileType.HTML)));
@@ -56,12 +56,12 @@ public class WikiEater {
 
 		logger.info("Reading css...");
 
-		Set<String> cssUrls = cssUtils.harvestCssUrls(pageDataList);
+		final Set<String> cssUrls = cssUtils.harvestCssUrls(pageDataList);
 		final File cacheFolderCss = new File(directoryCacheResourcesCss);
-		Set<CssData> cssDataSet = new HashSet<CssData>();
-		for (String cssUrl : cssUrls) {			
+		final Set<CssData> cssDataSet = new HashSet<CssData>();
+		for (String cssUrl : cssUrls) {
 			cssDataSet.addAll(cssUtils.extractCssData(fileUtils.getUrlContent(cssUrl, cacheFolderCss, FileType.CSS)));
-		}		
+		}
 		for (PageData pageData : pageDataList) {
 			cssDataSet.addAll(cssUtils.extractCssData(cssUtils.extractEmbededCss(pageData.getPageContent())));
 		}
@@ -72,11 +72,20 @@ public class WikiEater {
 			pageData.setPageContent(stripUtils.stripPageContent(pageData.getPageContent()));
 		}
 
+		logger.info("Reworking css..");
+
+		final Set<CssData> cssDataSetResult = new HashSet<CssData>();
+		final File cssResultFile = new File(directoryOutputResourcesCss, "style.css");
+		for (PageData pageData : pageDataList) {
+			cssDataSetResult.addAll(cssUtils.findOccuringCss(cssDataSet, pageData.getPageContent()));
+		}
+		fileUtils.saveCssDataIntoFile(cssDataSetResult, cssResultFile);
+
 		logger.info("Reading images...");
 
-		Set<String> imageUrls = imageUtils.harvestImageUrls(pageDataList);
+		final Set<String> imageUrls = imageUtils.harvestImageUrls(pageDataList);
 		final File cacheFolderImages = new File(directoryCacheResourcesImages);
-		Set<ImageData> ImageDataSet = new HashSet<ImageData>();
+		final Set<ImageData> ImageDataSet = new HashSet<ImageData>();
 		for (String imageUrl : imageUrls) {
 			ImageDataSet.add(new ImageData(fileUtils.makeImageFileName(imageUrl), fileUtils.getUrlFile(imageUrl,
 					cacheFolderImages, FileType.IMAGE)));
@@ -86,7 +95,6 @@ public class WikiEater {
 
 		urlUtils.replacePageUrls(pageDataList);
 		urlUtils.replaceImageUrls(pageDataList, ImageDataSet, "resources/images");
-		
 
 		logger.info("Saving data..");
 
@@ -96,7 +104,7 @@ public class WikiEater {
 		for (ImageData imageData : ImageDataSet) {
 			fileUtils.copyFile(imageData.getImageFile(), directoryOutputResourcesImages);
 		}
-		
+
 		logger.info("Done!");
 	}
 

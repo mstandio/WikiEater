@@ -1,9 +1,11 @@
 package org.openpano.wikieater.tools;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,12 +21,13 @@ public class CssUtilsTest {
 
 	CssUtils cssUtils;
 	List<PageData> pageDataList;
+	CssData cssData;
 
 	@Before
 	public void setUp() throws Exception {
 		cssUtils = new CssUtils();
 		pageDataList = new ArrayList<PageData>();
-	}	
+	}
 
 	@Test
 	public void extractCssLinksTest() throws Exception {
@@ -77,5 +80,85 @@ public class CssUtilsTest {
 
 		assertTrue(foundA);
 		assertTrue(foundC);
+	}
+
+	@Test
+	public void analyseCssDataTest() throws Exception {
+		cssData = new CssData("", "");
+		cssUtils.analyseCssData(cssData);
+
+		assertEquals(0, cssData.ids.size());
+		assertEquals(0, cssData.cls.size());
+
+		cssData = new CssData("#s_ids", "");
+		cssUtils.analyseCssData(cssData);
+
+		assertEquals(1, cssData.ids.size());
+		assertEquals(0, cssData.cls.size());
+		assertTrue(cssData.ids.contains("s_ids"));
+		assertFalse(cssData.isUniversal);
+
+		cssData = new CssData(".s-cls", "");
+		cssUtils.analyseCssData(cssData);
+
+		assertEquals(0, cssData.ids.size());
+		assertEquals(1, cssData.cls.size());
+		assertTrue(cssData.cls.contains("s-cls"));
+		assertFalse(cssData.isUniversal);
+
+		cssData = new CssData("li", "");
+		cssUtils.analyseCssData(cssData);
+		assertTrue(cssData.isUniversal);
+	}
+
+	@Test
+	public void findOccuringCssTest() throws Exception {
+		Set<CssData> cssDataSetResult = null;
+		Set<CssData> cssDataSet = new HashSet<CssData>();
+
+		cssDataSet.clear();
+		cssData = new CssData(".scls", "");
+		cssUtils.analyseCssData(cssData);
+		cssDataSet.add(cssData);
+		cssData = new CssData(".ath", "");
+		cssUtils.analyseCssData(cssData);
+		cssDataSet.add(cssData);
+		
+		cssDataSetResult = cssUtils.findOccuringCss(cssDataSet, "class=\"scls\"");
+
+		assertEquals(1, cssDataSetResult.size());
+
+		cssDataSet.clear();
+		cssData = new CssData("#scls", "");
+		cssUtils.analyseCssData(cssData);
+		cssDataSet.add(cssData);
+		cssData = new CssData("#ath", "");
+		cssUtils.analyseCssData(cssData);
+		cssDataSet.add(cssData);
+		cssDataSetResult = cssUtils.findOccuringCss(cssDataSet, "id=\"scls\"");
+		
+		assertEquals(1, cssDataSetResult.size());
+		
+		cssDataSet.clear();
+		cssData = new CssData(".scls", "");
+		cssUtils.analyseCssData(cssData);
+		cssDataSet.add(cssData);
+		cssData = new CssData("#ath", "");
+		cssUtils.analyseCssData(cssData);
+		cssDataSet.add(cssData);
+		cssDataSetResult = cssUtils.findOccuringCss(cssDataSet, "class=\"scls\" id=\"ath\"");
+		
+		assertEquals(2, cssDataSetResult.size());
+		
+		cssDataSet.clear();
+		cssData = new CssData(".scls", "");
+		cssUtils.analyseCssData(cssData);
+		cssDataSet.add(cssData);
+		cssData = new CssData("#scls", "");
+		cssUtils.analyseCssData(cssData);
+		cssDataSet.add(cssData);
+		cssDataSetResult = cssUtils.findOccuringCss(cssDataSet, "class=\"scls\"");
+		
+		assertEquals(1, cssDataSetResult.size());
 	}
 }

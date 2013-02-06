@@ -55,7 +55,9 @@ public class CssUtils extends MediaUtils {
 				selector = cssContent.substring(start, matcher.start()).trim();
 			} else {
 				body = cssContent.substring(start, matcher.start());
-				cssDataSet.add(new CssData(selector, body));
+				CssData cssData = new CssData(selector, body);
+				analyseCssData(cssData);
+				cssDataSet.add(cssData);
 			}
 			start = matcher.end();
 		}
@@ -74,5 +76,56 @@ public class CssUtils extends MediaUtils {
 			}
 		}
 		return extractedCssLinks;
+	}
+
+	void analyseCssData(CssData cssData) {
+		String selector = cssData.getSelector().replaceAll(",", "");
+		String patternStyleCls = "\\.[\\w_-]+";
+		String patternStyleIds = "#[\\w_-]+";
+		cssData.isUniversal = selector.matches("((\\s|^)\\w+(\\s|$))|(a(\\.|:))");
+		Pattern pattern = Pattern.compile(patternStyleCls + "|" + patternStyleIds);
+		Matcher matcher = pattern.matcher(selector);
+		while (matcher.find()) {
+			String group = matcher.group();
+			if (group.matches(patternStyleCls)) {
+				cssData.cls.add(group.substring(1));
+			} else {
+				cssData.ids.add(group.substring(1));
+			}
+		}
+	}
+
+	public Set<CssData> findOccuringCss(Set<CssData> cssDataSet, String pageContent) {
+		Set<CssData> cssDataSetResult = new HashSet<CssData>();
+		String patternSelectorCls = "class=\"[\\w\\s_-]+\"";
+		String patternSelectorIds = "id=\"[\\w\\s_-]+\"";
+		Pattern pattern = Pattern.compile(patternSelectorCls + "|" + patternSelectorIds, Pattern.CASE_INSENSITIVE);
+		for (CssData cssData : cssDataSet) {
+			Matcher matcher = pattern.matcher(pageContent);
+			m: while (matcher.find()) {
+				String group = matcher.group();
+				if (group.matches(patternSelectorCls)) {
+					for (String selectorCls : cssData.cls) {
+						if (group.contains(selectorCls)) {
+							cssDataSetResult.add(cssData);
+							break m;
+						}
+					}
+				} else {
+					for (String selectorIds : cssData.ids) {
+						if (group.contains(selectorIds)) {
+							cssDataSetResult.add(cssData);
+							break m;
+						}
+					}
+				}
+			}
+		}
+		for (CssData cssData : cssDataSet) {
+			if (cssData.isUniversal) {
+				cssDataSetResult.add(cssData);
+			}
+		}
+		return cssDataSetResult;
 	}
 }

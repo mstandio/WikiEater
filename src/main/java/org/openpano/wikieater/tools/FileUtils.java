@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.openpano.wikieater.data.CssData;
 import org.openpano.wikieater.data.PageData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ public class FileUtils {
 			}
 			throw new IOException("Could not find: " + cacheFileName);
 		} else {
-			logger.info("Downloading: ", url);
+			logger.info("Downloading: {}", url);
 			String urlContent = readFromUrl(url);
 			if (FileType.CSS.equals(fileType)) {
 				urlContent = cleanCssContent(urlContent);
@@ -312,6 +313,20 @@ public class FileUtils {
 			}
 			if (inStream != null) {
 				inStream.close();
+			}
+		}
+	}
+
+	public void saveCssDataIntoFile(Set<CssData> cssDataSet, File cssFile) throws IOException {
+		BufferedWriter bufferedWriter = null;
+		try {
+			bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(cssFile), ENC));
+			for (CssData cssData : cssDataSet) {
+				bufferedWriter.write(cssData.getSelector() + " {" + cssData.getBody() + "}\n");
+			}
+		} finally {
+			if (bufferedWriter != null) {
+				bufferedWriter.close();
 			}
 		}
 	}
