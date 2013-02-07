@@ -19,6 +19,33 @@ public class StripUtilsTest {
 	}
 
 	@Test
+	public void extractBodyFromPageContent() throws Exception {
+		String pageContent = "A<body BC>D</body>E";
+
+		String expectedResult = "<body BC>D</body>";
+
+		assertEquals(expectedResult, stripUtils.extractBodyFromPageContent(pageContent));
+	}
+
+	@Test
+	public void removeScriptsFromPagecontent() throws Exception {
+		String pageContent = "A<script>D</script>E";
+
+		String expectedResult = "AE";
+
+		assertEquals(expectedResult, stripUtils.removeScriptsFromPagecontent(pageContent));
+	}
+	
+	@Test
+	public void removeCommentsFromPagecontent() throws Exception {
+		String pageContent = "A<!--B-->C";
+
+		String expectedResult = "AC";
+
+		assertEquals(expectedResult, stripUtils.removeCommentsFromPagecontent(pageContent));		
+	}
+
+	@Test
 	public void extractDivFromPageContent() throws Exception {
 		String pageContent = "<div>" + "<div id=\"a\"></div>" + "<div class=\"b\">" + "<div class=\"c\"></div>"
 				+ "</div>" + "<div class=\"d\"></div>" + "</div>";
@@ -37,7 +64,7 @@ public class StripUtilsTest {
 
 		assertEquals(expectedResult, stripUtils.removeElementsFromPageContent(pageContent, ElementType.div, "a"));
 	}
-	
+
 	@Test
 	public void cleanupPageContent() throws Exception {
 		String pageContent = "A<h1></h1>B<h2>C</h2>D<h3 class=\"F\">  </h3>E<h4/><h4/>";

@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -20,6 +22,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.openpano.wikieater.data.CssData;
 import org.openpano.wikieater.data.PageData;
@@ -266,28 +275,31 @@ public class FileUtils {
 	}
 
 	public void saveAsHtmlFile(PageData pageData, String outputDirecotry) throws IOException {
+		String pageContent = pageData.getPageContent();
 		try {
-			// too slow for now
-			// Source xmlInput = new StreamSource(new
-			// StringReader(fileContent));
-			// StringWriter stringWriter = new StringWriter();
-			// StreamResult xmlOutput = new StreamResult(stringWriter);
-			// TransformerFactory transformerFactory =
-			// TransformerFactory.newInstance();
-			// transformerFactory.setAttribute("indent-number", 2);
-			// Transformer transformer = transformerFactory.newTransformer();
-			// transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			// transformer.transform(xmlInput, xmlOutput);
-			// fileContent = xmlOutput.getWriter().toString();
+			Source xmlInput = new StreamSource(new StringReader(pageContent));
+			StringWriter stringWriter = new StringWriter();
+			StreamResult xmlOutput = new StreamResult(stringWriter);
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			transformerFactory.setAttribute("indent-number", 4);
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.setOutputProperty(OutputKeys.METHOD, "html");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.transform(xmlInput, xmlOutput);
+			pageContent = xmlOutput.getWriter().toString();
+			System.out.println(pageContent);
+
 		} catch (Exception e) {
 			logger.info("Could not format file '{}', cause: {}", pageData.getHtmlFileName(), e.getMessage());
+			pageContent = pageData.getPageContent();
 		}
 
 		BufferedWriter bufferedWriter = null;
 		try {
 			bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(new File(
 					outputDirecotry), pageData.getHtmlFileName())), ENC));
-			bufferedWriter.write(pageData.getPageContent());
+			bufferedWriter.write(pageContent);
 			logger.info("Saved file '{}'", pageData.getHtmlFileName());
 		} finally {
 			if (bufferedWriter != null) {

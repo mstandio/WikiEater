@@ -23,6 +23,7 @@ public class UrlUtilsTest {
 	UrlUtils urlUtils;
 	List<PageData> pageDataList;
 	Set<ImageData> imageDataSet;
+	PageData pageData;
 
 	@Before
 	public void setUp() throws Exception {
@@ -33,10 +34,10 @@ public class UrlUtilsTest {
 
 	@Test
 	public void replacePageContentHrefsTest() throws Exception {
-		String pageContent = "XY<a href=\"X\">XY<img src=\"Y\">XY";
-
+		pageData = new PageData("", "", "XY<a href=\"X\">XY<img src=\"Y\">XY");
+		
 		HrefReplacerMock hrefReplacerMock = new HrefReplacerMock();
-		String result = urlUtils.replacePageContentHrefs(pageContent, hrefReplacerMock);
+		String result = urlUtils.replacePageContentHrefs(pageData, hrefReplacerMock);
 
 		assertEquals(2, hrefReplacerMock.requestedReplacements.size());
 		assertEquals("X", hrefReplacerMock.requestedReplacements.get(0));
@@ -46,13 +47,13 @@ public class UrlUtilsTest {
 
 	@Test
 	public void replacePageContentHrefsNoMatchesTest() throws Exception {
-		String pageContent = "XYXY";
+		pageData = new PageData("","","XYXY");
 
 		HrefReplacerMock hrefReplacerMock = new HrefReplacerMock();
-		String result = urlUtils.replacePageContentHrefs(pageContent, hrefReplacerMock);
+		String result = urlUtils.replacePageContentHrefs(pageData, hrefReplacerMock);
 
 		assertEquals(0, hrefReplacerMock.requestedReplacements.size());
-		assertEquals(pageContent, result);
+		assertEquals(pageData.getPageContent(), result);
 	}
 
 	class HrefReplacerMock implements HrefReplacer {

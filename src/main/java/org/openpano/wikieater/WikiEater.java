@@ -34,6 +34,9 @@ public class WikiEater {
 	private final String directoryOutputResources = "./files/output/resources";
 	private final String directoryOutputResourcesCss = "./files/output/resources/css";
 	private final String directoryOutputResourcesImages = "./files/output/resources/images";
+	
+	private final String pathResourcesImages = "resources/images";
+	private final String pathResourcesCss = "resources/css";
 
 	private final FileUtils fileUtils = new FileUtils();
 	private final CssUtils cssUtils = new CssUtils();
@@ -94,7 +97,8 @@ public class WikiEater {
 		logger.info("Reworking pages..");
 
 		urlUtils.replacePageUrls(pageDataList);
-		urlUtils.replaceImageUrls(pageDataList, ImageDataSet, "resources/images");
+		urlUtils.replaceImageUrls(pageDataList, ImageDataSet, pathResourcesImages);
+		urlUtils.replaceCssUrl(pageDataList, cssResultFile.getName(), pathResourcesCss);
 
 		logger.info("Saving data..");
 

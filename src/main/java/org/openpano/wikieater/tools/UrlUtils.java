@@ -11,32 +11,39 @@ import org.openpano.wikieater.data.PageData;
 /**
  * @author mstandio
  */
-public class UrlUtils {
+public class UrlUtils extends MediaUtils {
 
 	public void replacePageUrls(List<PageData> pageDataList) {
 		HrefReplacer hrefPageReplacer = new HrefPageReplacer(pageDataList);
 		for (PageData pageData : pageDataList) {
-			pageData.setPageContent(replacePageContentHrefs(pageData.getPageContent(), hrefPageReplacer));
+			pageData.setPageContent(replacePageContentHrefs(pageData, hrefPageReplacer));
 		}
 	}
 
 	public void replaceImageUrls(List<PageData> pageDataList, Set<ImageData> imageDataSet, String outputDirectory) {
 		HrefReplacer hrefImageReplacer = new HrefImageReplacer(imageDataSet, outputDirectory);
 		for (PageData pageData : pageDataList) {
-			pageData.setPageContent(replacePageContentHrefs(pageData.getPageContent(), hrefImageReplacer));
+			pageData.setPageContent(replacePageContentHrefs(pageData, hrefImageReplacer));
 		}
 	}
 
-	String replacePageContentHrefs(String pageContent, HrefReplacer hrefReplacer) {
+	public void replaceCssUrl(List<PageData> pageDataList, String cssFileName, String outputdirecotry) {
+		HrefReplacer hrefImageReplacer = new HrefCssResultReplacer(outputdirecotry + "/" + cssFileName);
+		for (PageData pageData : pageDataList) {
+			pageData.setPageContent(replacePageContentHrefs(pageData, hrefImageReplacer));
+		}
+	}
+
+	String replacePageContentHrefs(PageData pageData, HrefReplacer hrefReplacer) {
 		Pattern pattern = Pattern.compile("(?<=href=\")([^\"]+)|(?<=src=\")([^\"]+)", Pattern.CASE_INSENSITIVE);
-		Matcher matcher = pattern.matcher(pageContent);
+		Matcher matcher = pattern.matcher(pageData.getPageContent());
 		StringBuffer stringBuffer = new StringBuffer();
 		int end = 0;
 		while (matcher.find()) {
 			matcher.appendReplacement(stringBuffer, hrefReplacer.getReplacement(matcher.group().trim()));
 			end = matcher.end();
 		}
-		stringBuffer.append(pageContent.substring(end, pageContent.length()));
+		stringBuffer.append(pageData.getPageContent().substring(end, pageData.getPageContent().length()));
 		return stringBuffer.toString();
 	}
 
@@ -70,6 +77,14 @@ public class UrlUtils {
 		return src;
 	}
 
+	String findCssResultReplacement(String href, String cssResultUrl) {
+		if (href.equals(StripUtils.RESULT_CSS_TAG)) {
+			return cssResultUrl;
+		} else {
+			return href;
+		}
+	}
+
 	interface HrefReplacer {
 		public String getReplacement(String href);
 	}
@@ -101,6 +116,20 @@ public class UrlUtils {
 		@Override
 		public String getReplacement(String src) {
 			return findSrcImageReplacement(src, imageDataSet, outputDirectory);
+		}
+	}
+
+	class HrefCssResultReplacer implements HrefReplacer {
+
+		private final String cssResultUrl;
+
+		public HrefCssResultReplacer(String cssResultUrl) {
+			this.cssResultUrl = cssResultUrl;
+		}
+
+		@Override
+		public String getReplacement(String href) {
+			return findCssResultReplacement(href, cssResultUrl);
 		}
 	}
 }

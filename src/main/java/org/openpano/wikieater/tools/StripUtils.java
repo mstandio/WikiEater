@@ -8,8 +8,105 @@ import java.util.regex.Pattern;
  */
 public class StripUtils {
 
+	public static final String RESULT_CSS_TAG = "[CSS]";
+
 	public String stripPageContent(String pageContent) {
+		return getPageHeader(pageContent) + getPageBody(pageContent) + "</html>";
+	}
+
+	String getPageHeader(String pageContent) {
+		String patternTagOpen = "<[^>/]+/?>";
+		String patternTagClose = "</[^>]+>";
+		Pattern pattern = Pattern.compile(patternTagOpen + "|" + patternTagClose, Pattern.CASE_INSENSITIVE);
+		StringBuffer stringBuffer = new StringBuffer();
+		Matcher matcher = pattern.matcher(pageContent);
+		while (matcher.find()) {
+			String group = matcher.group().toLowerCase();
+			if (group.matches(patternTagOpen)) {
+				if (group.startsWith("<!doctype") || group.startsWith("<html") || group.startsWith("<head")
+						|| group.startsWith("<meta")) {
+					stringBuffer.append(group);
+				}
+			} else {
+				if (group.startsWith("</head")) {
+					stringBuffer.append("<link rel=\"stylesheet\" href=\"" + RESULT_CSS_TAG + "\"/>");
+					stringBuffer.append(group);
+					break;
+				}
+			}
+		}
+		return stringBuffer.toString();
+	}
+
+	String getPageBody(String pageContent) {
+		pageContent = extractBodyFromPageContent(pageContent);
+		pageContent = removeScriptsFromPagecontent(pageContent);
+		pageContent = removeCommentsFromPagecontent(pageContent);
+		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "right-navigation");
+		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "mw-panel");
+		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "portal");
+		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "footer");
+		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "mw-head");
+		pageContent = removeElementsFromPageContent(pageContent, ElementType.table, "whos_here");
+		pageContent = removeElementsFromPageContent(pageContent, ElementType.span, "editsection");
+		pageContent = cleanupPageContent(pageContent);
 		return pageContent;
+	}
+
+	String extractBodyFromPageContent(String pageContent) {
+		String patternTagOpen = "<body[^>]*>";
+		String patternTagClose = "</body>";
+		Pattern pattern = Pattern.compile(patternTagOpen + "|" + patternTagClose, Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(pageContent);
+		StringBuilder stringBuilder = new StringBuilder();
+		int start = 0;
+		while (matcher.find()) {
+			String group = matcher.group();
+			if (group.matches(patternTagOpen)) {
+				start = matcher.start();
+			} else {
+				stringBuilder.append(pageContent.substring(start, matcher.end()));
+			}
+		}
+		return stringBuilder.toString();
+	}
+
+	String removeScriptsFromPagecontent(String pageContent) {
+		String patternTagOpen = "<script[^>]*/?>";
+		String patternTagClose = "</script>";
+		Pattern pattern = Pattern.compile(patternTagOpen + "|" + patternTagClose, Pattern.CASE_INSENSITIVE);
+		StringBuffer stringBuffer = new StringBuffer();
+		Matcher matcher = pattern.matcher(pageContent);
+		int start = 0;
+		while (matcher.find()) {
+			String group = matcher.group();
+			if (group.matches(patternTagOpen)) {
+				stringBuffer.append(pageContent.substring(start, matcher.start()));
+			} else {
+				start = matcher.end();
+			}
+		}
+		stringBuffer.append(pageContent.substring(start, pageContent.length()));
+		return stringBuffer.toString();
+	}
+
+	String removeCommentsFromPagecontent(String pageContent) {
+		String patternCommentOpen = "<!--";
+		String patternCommentClose = "-->";
+		Pattern pattern = Pattern.compile(patternCommentOpen + "|" + patternCommentClose, Pattern.CASE_INSENSITIVE);
+		StringBuffer stringBuffer = new StringBuffer();
+		Matcher matcher = pattern.matcher(pageContent);
+		int start = 0;
+		while (matcher.find()) {
+			String group = matcher.group();
+			if (group.matches(patternCommentOpen)) {
+				stringBuffer.append(pageContent.substring(start, matcher.start()));
+			} else {
+				start = matcher.end();
+			}
+		}
+		stringBuffer.append(pageContent.substring(start, pageContent.length()));
+		return stringBuffer.toString();
 	}
 
 	String extractDivFromPageContent(String pageContent, String divName) {
@@ -43,7 +140,7 @@ public class StripUtils {
 	}
 
 	enum ElementType {
-		div, span
+		body, div, span, table
 	}
 
 	String removeElementsFromPageContent(String pageContent, ElementType elementType, String elementName) {
@@ -82,7 +179,6 @@ public class StripUtils {
 	String cleanupPageContent(String pageContent) {
 		String patternTagOpen = "<[^>/]+/?>";
 		String patternTagClose = "</[^>]+>";
-
 		Pattern pattern = Pattern.compile(patternTagOpen + "|" + patternTagClose, Pattern.CASE_INSENSITIVE);
 		StringBuffer stringBuffer = new StringBuffer();
 		Matcher matcher = pattern.matcher(pageContent);
