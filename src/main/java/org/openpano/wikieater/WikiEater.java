@@ -35,8 +35,8 @@ public class WikiEater {
 	private final String directoryOutputResourcesCss = "./files/output/resources/css";
 	private final String directoryOutputResourcesImages = "./files/output/resources/images";
 	
-	private final String pathResourcesImages = "resources/images";
-	private final String pathResourcesCss = "resources/css";
+	private final String pathResourcesImages = "images";
+	private final String pathResourcesCss = "css";
 
 	private final FileUtils fileUtils = new FileUtils();
 	private final CssUtils cssUtils = new CssUtils();
@@ -48,7 +48,7 @@ public class WikiEater {
 
 		logger.info("Reading pages...");
 
-		final File urlsFile = new File("./files/links.txt");
+		final File urlsFile = new File("./files/menu.txt");
 		final Set<String> pageUrls = fileUtils.readUrls(urlsFile);
 		final File cacheFolder = new File(directoryCache);
 		final List<PageData> pageDataList = new ArrayList<PageData>();
@@ -75,14 +75,13 @@ public class WikiEater {
 			pageData.setPageContent(stripUtils.stripPageContent(pageData.getPageContent()));
 		}
 
-		logger.info("Reworking css..");
+		logger.info("Processing css..");
 
 		final Set<CssData> cssDataSetResult = new HashSet<CssData>();
 		final File cssResultFile = new File(directoryOutputResourcesCss, "style.css");
 		for (PageData pageData : pageDataList) {
 			cssDataSetResult.addAll(cssUtils.findOccuringCss(cssDataSet, pageData.getPageContent()));
 		}
-		fileUtils.saveCssDataIntoFile(cssDataSetResult, cssResultFile);
 
 		logger.info("Reading images...");
 
@@ -94,7 +93,7 @@ public class WikiEater {
 					cacheFolderImages, FileType.IMAGE)));
 		}
 
-		logger.info("Reworking pages..");
+		logger.info("Assembling pages..");
 
 		urlUtils.replacePageUrls(pageDataList);
 		urlUtils.replaceImageUrls(pageDataList, ImageDataSet, pathResourcesImages);
@@ -103,11 +102,12 @@ public class WikiEater {
 		logger.info("Saving data..");
 
 		for (PageData pageData : pageDataList) {
-			fileUtils.saveAsHtmlFile(pageData, directoryOutput);
+			fileUtils.saveAsHtmlFile(pageData, directoryOutputResources);
 		}
 		for (ImageData imageData : ImageDataSet) {
 			fileUtils.copyFile(imageData.getImageFile(), directoryOutputResourcesImages);
 		}
+		fileUtils.saveCssDataIntoFile(cssDataSetResult, cssResultFile);
 
 		logger.info("Done!");
 	}

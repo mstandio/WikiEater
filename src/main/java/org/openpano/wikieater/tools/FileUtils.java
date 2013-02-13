@@ -40,13 +40,13 @@ import org.slf4j.LoggerFactory;
  */
 public class FileUtils {
 
+	public static final String ENC = "UTF-8";
+	
 	public enum FileType {
 		HTML, CSS, IMAGE
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
-
-	private static final String ENC = "UTF-8";
+	private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);	
 
 	public String getUrlContent(String url, File cacheFolder, FileType fileType) throws IOException {
 		url = url.trim();
@@ -107,17 +107,18 @@ public class FileUtils {
 		return cacheFile;
 	}
 
-	public Set<String> readUrls(File urlsFile) throws IOException {
+	public Set<String> readUrls(File menuFile) throws IOException {
 		Set<String> urls = new HashSet<String>();
 		BufferedReader bufferedReader = null;
 		try {
-			bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(urlsFile),
+			bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(menuFile),
 					Charset.forName(ENC)));
+			Pattern pattern = Pattern.compile("http(s)?://[^\\s\\]]+");
 			String line = null;
 			while ((line = bufferedReader.readLine()) != null) {
-				line = line.trim();
-				if (!line.isEmpty() && !line.startsWith("#")) {
-					urls.add(removeNamedAnchorFromUrl(line));
+				Matcher matcher = pattern.matcher(line);
+				if(matcher.find()){				
+					urls.add(removeNamedAnchorFromUrl(matcher.group()));
 				}
 			}
 		} finally {
@@ -125,7 +126,7 @@ public class FileUtils {
 				bufferedReader.close();
 			}
 		}
-		logger.info("Found {} urls in file '{}'", urls.size(), urlsFile.getName());
+		logger.info("Found {} urls in file '{}'", urls.size(), menuFile.getName());
 		return urls;
 	}
 

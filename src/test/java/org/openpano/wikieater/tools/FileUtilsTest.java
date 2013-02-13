@@ -143,14 +143,14 @@ public class FileUtilsTest {
 
 	@Test
 	public void readUrlsTest() throws IOException {
-		File fileUrls = new File(this.getClass().getResource("/links.txt").getFile());
+		File fileUrls = new File(this.getClass().getResource("/menu.txt").getFile());
 		assertTrue(fileUrls.exists());
 
 		Set<String> urls = fileUtils.readUrls(fileUrls);
 
 		assertEquals(2, urls.size());
-		assertTrue(urls.contains("link1"));
-		assertTrue(urls.contains("link2"));
+		assertTrue(urls.contains("http://link1"));
+		assertTrue(urls.contains("http://link2"));
 	}
 
 	@Test
