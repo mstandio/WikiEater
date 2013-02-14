@@ -15,7 +15,15 @@ import org.openpano.wikieater.data.PageData;
 /**
  * @author mstandio
  */
-public class MenuUtils {
+public class MenuUtils extends ResourceUtils {
+
+	public PageData getMenuPageData(File menuFile, List<PageData> pageDataList) throws IOException {
+		String menuFileName = "wikieater-menu.html";
+		String menuTemplate = getResourceContent("/html/" + menuFileName);
+		String menuBody = makeMenuBody(menuFile, pageDataList);
+		menuTemplate = menuTemplate.replace("[MENU_BODY]", menuBody);
+		return new PageData(null, menuFileName, menuTemplate);
+	}
 
 	String makeMenuBody(File menuFile, List<PageData> pageDataList) throws IOException {
 		StringBuilder stringBuilder = new StringBuilder();
@@ -28,7 +36,6 @@ public class MenuUtils {
 			String nextLine = bufferedReader.readLine();
 			while (currLine != null) {
 				stringBuilder.append(digestLineUrlTags(digestLines(prevLine, currLine, nextLine), pageDataList));
-				stringBuilder.append("\n");
 				prevLine = currLine;
 				currLine = nextLine;
 				nextLine = bufferedReader.readLine();
@@ -42,7 +49,7 @@ public class MenuUtils {
 	}
 
 	String digestLineUrlTags(String line, List<PageData> pageDataList) {
-		Pattern pattern = Pattern.compile("[http(s)?:[^\\]]+\\]");
+		Pattern pattern = Pattern.compile("\\[http(s)?[^\\]]+\\]");
 		Matcher matcher = pattern.matcher(line);
 		StringBuffer stringBuffer = new StringBuffer();
 		int end = 0;
@@ -74,7 +81,7 @@ public class MenuUtils {
 			}
 		}
 		if (href != null) {
-			return "<a href=\"" + href + "\">" + urlDesc + "</a>";
+			return "<a href=\"" + href + "\" target=\"content\">" + urlDesc + "</a>";
 		}
 		return urlVal;
 	}
@@ -92,8 +99,24 @@ public class MenuUtils {
 	}
 
 	String digestTitle(String line) {
-				
-		return line;
+		int titleLevel = getTitleLevel(line);
+		if (titleLevel > 0) {
+			line = line.replaceAll("=", "");
+			return "<h" + titleLevel + ">" + line + "</h" + titleLevel + ">";
+		} else {
+			return line;
+		}
+	}
+
+	int getTitleLevel(String line) {
+		if (line != null) {
+			for (int i = 0; i < line.length(); i++) {
+				if (line.charAt(i) != '=') {
+					return i;
+				}
+			}
+		}
+		return 0;
 	}
 
 	String digestList(String prevLine, String currLine, String nextLine) {

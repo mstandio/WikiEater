@@ -2,6 +2,7 @@ package org.openpano.wikieater.tools;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -10,7 +11,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -20,20 +20,26 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.openpano.wikieater.data.CssData;
 import org.openpano.wikieater.data.PageData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * @author mstandio
@@ -41,12 +47,20 @@ import org.slf4j.LoggerFactory;
 public class FileUtils {
 
 	public static final String ENC = "UTF-8";
-	
+
 	public enum FileType {
 		HTML, CSS, IMAGE
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);	
+	private static final Logger logger = Logger.getLogger(FileUtils.class.getName());
+	
+	static {
+		Formatter formatter = new LoggerFormatter();
+		ConsoleHandler consoleHandler = new ConsoleHandler();
+		consoleHandler.setFormatter(formatter);
+		logger.addHandler(consoleHandler);
+		logger.setUseParentHandlers(false);
+	}
 
 	public String getUrlContent(String url, File cacheFolder, FileType fileType) throws IOException {
 		url = url.trim();
@@ -68,7 +82,7 @@ public class FileUtils {
 			}
 			throw new IOException("Could not find: " + cacheFileName);
 		} else {
-			logger.info("Downloading: {}", url);
+			logger.info("Downloading: " + url);
 			String urlContent = readFromUrl(url);
 			if (FileType.CSS.equals(fileType)) {
 				urlContent = cleanCssContent(urlContent);
@@ -91,7 +105,7 @@ public class FileUtils {
 		if (cacheFile.exists()) {
 			return cacheFile;
 		}
-		logger.info("Downloading: '{}'", url);
+		logger.info("Downloading: " + url);
 		URL website = new URL(url);
 		FileOutputStream fileOutputStream = null;
 		try {
@@ -117,7 +131,7 @@ public class FileUtils {
 			String line = null;
 			while ((line = bufferedReader.readLine()) != null) {
 				Matcher matcher = pattern.matcher(line);
-				if(matcher.find()){				
+				if (matcher.find()) {
 					urls.add(removeNamedAnchorFromUrl(matcher.group()));
 				}
 			}
@@ -126,7 +140,7 @@ public class FileUtils {
 				bufferedReader.close();
 			}
 		}
-		logger.info("Found {} urls in file '{}'", urls.size(), menuFile.getName());
+		logger.info("Found " + urls.size() + " urls in file " + menuFile.getName());
 		return urls;
 	}
 
@@ -278,21 +292,31 @@ public class FileUtils {
 	public void saveAsHtmlFile(PageData pageData, String outputDirecotry) throws IOException {
 		String pageContent = pageData.getPageContent();
 		try {
-			Source xmlInput = new StreamSource(new StringReader(pageContent));
-			StringWriter stringWriter = new StringWriter();
-			StreamResult xmlOutput = new StreamResult(stringWriter);
+			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+			documentBuilderFactory.setValidating(false);
+			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+			documentBuilder.setEntityResolver(new EntityResolver() {
+				
+				@Override
+				public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {					
+					return new InputSource( new ByteArrayInputStream( "".getBytes() ) );
+				}
+			});
+			Document document = documentBuilder.parse(new ByteArrayInputStream(pageContent.getBytes(ENC)));
+
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			transformerFactory.setAttribute("indent-number", 4);
 			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 			transformer.setOutputProperty(OutputKeys.METHOD, "html");
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.transform(xmlInput, xmlOutput);
-			pageContent = xmlOutput.getWriter().toString();
-			System.out.println(pageContent);
+
+			StringWriter stringWriter = new StringWriter();
+			StreamResult streamResult = new StreamResult(stringWriter);
+			DOMSource domSource = new DOMSource(document);
+			transformer.transform(domSource, streamResult);
+			pageContent = stringWriter.toString();
 
 		} catch (Exception e) {
-			logger.info("Could not format file '{}', cause: {}", pageData.getHtmlFileName(), e.getMessage());
+			logger.info("Could not format file '" + pageData.getHtmlFileName() + "', cause: " + e.getMessage());
 			pageContent = pageData.getPageContent();
 		}
 
@@ -301,7 +325,7 @@ public class FileUtils {
 			bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(new File(
 					outputDirecotry), pageData.getHtmlFileName())), ENC));
 			bufferedWriter.write(pageContent);
-			logger.info("Saved file '{}'", pageData.getHtmlFileName());
+			logger.info("Saved file " + pageData.getHtmlFileName());
 		} finally {
 			if (bufferedWriter != null) {
 				bufferedWriter.close();

@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Logger;
 
 import org.openpano.wikieater.data.CssData;
 import org.openpano.wikieater.data.ImageData;
@@ -14,17 +17,26 @@ import org.openpano.wikieater.tools.CssUtils;
 import org.openpano.wikieater.tools.FileUtils;
 import org.openpano.wikieater.tools.FileUtils.FileType;
 import org.openpano.wikieater.tools.ImageUtils;
+import org.openpano.wikieater.tools.IndexUtils;
+import org.openpano.wikieater.tools.LoggerFormatter;
+import org.openpano.wikieater.tools.MenuUtils;
 import org.openpano.wikieater.tools.StripUtils;
 import org.openpano.wikieater.tools.UrlUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author mstandio
  */
 public class WikiEater {
 
-	private static final Logger logger = LoggerFactory.getLogger(WikiEater.class);
+	private static final Logger logger = Logger.getLogger(WikiEater.class.getName());
+
+	static {
+		Formatter formatter = new LoggerFormatter();
+		ConsoleHandler consoleHandler = new ConsoleHandler();
+		consoleHandler.setFormatter(formatter);
+		logger.addHandler(consoleHandler);
+		logger.setUseParentHandlers(false);
+	}
 
 	private final String directoryCache = "./files/cache";
 	private final String directoryCacheResources = "./files/cache/resources";
@@ -34,7 +46,7 @@ public class WikiEater {
 	private final String directoryOutputResources = "./files/output/resources";
 	private final String directoryOutputResourcesCss = "./files/output/resources/css";
 	private final String directoryOutputResourcesImages = "./files/output/resources/images";
-	
+
 	private final String pathResourcesImages = "images";
 	private final String pathResourcesCss = "css";
 
@@ -43,13 +55,15 @@ public class WikiEater {
 	private final ImageUtils imageUtils = new ImageUtils();
 	private final UrlUtils urlUtils = new UrlUtils();
 	private final StripUtils stripUtils = new StripUtils();
+	private final MenuUtils menuUtils = new MenuUtils();
+	private final IndexUtils indexUtils = new IndexUtils();
 
 	void processUrls() throws IOException {
 
 		logger.info("Reading pages...");
 
-		final File urlsFile = new File("./files/menu.txt");
-		final Set<String> pageUrls = fileUtils.readUrls(urlsFile);
+		final File menuFile = new File("./files/menu.txt");
+		final Set<String> pageUrls = fileUtils.readUrls(menuFile);
 		final File cacheFolder = new File(directoryCache);
 		final List<PageData> pageDataList = new ArrayList<PageData>();
 		for (String pageUrl : pageUrls) {
@@ -108,6 +122,8 @@ public class WikiEater {
 			fileUtils.copyFile(imageData.getImageFile(), directoryOutputResourcesImages);
 		}
 		fileUtils.saveCssDataIntoFile(cssDataSetResult, cssResultFile);
+		fileUtils.saveAsHtmlFile(menuUtils.getMenuPageData(menuFile, pageDataList), directoryOutputResources);
+		fileUtils.saveAsHtmlFile(indexUtils.getIndexPageData(menuFile, pageDataList), directoryOutput);
 
 		logger.info("Done!");
 	}

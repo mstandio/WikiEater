@@ -1,2 +1,5 @@
-[http://link1 desc]
-[http://link2#namedAnchor]
+=T1=
+*[http://link1 desc]
+**[http://link2#namedAnchor]
+
+==T2==
