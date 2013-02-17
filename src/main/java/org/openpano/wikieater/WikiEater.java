@@ -10,9 +10,11 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Logger;
 
+import org.openpano.wikieater.data.CliData;
 import org.openpano.wikieater.data.CssData;
 import org.openpano.wikieater.data.ImageData;
 import org.openpano.wikieater.data.PageData;
+import org.openpano.wikieater.tools.CliUtils;
 import org.openpano.wikieater.tools.CssUtils;
 import org.openpano.wikieater.tools.FileUtils;
 import org.openpano.wikieater.tools.FileUtils.FileType;
@@ -38,18 +40,21 @@ public class WikiEater {
 		logger.setUseParentHandlers(false);
 	}
 
-	private final String directoryCache = "./files/cache";
-	private final String directoryCacheResources = "./files/cache/resources";
-	private final String directoryCacheResourcesCss = "./files/cache/resources/css";
-	private final String directoryCacheResourcesImages = "./files/cache/resources/images";
-	private final String directoryOutput = "./files/output";
-	private final String directoryOutputResources = "./files/output/resources";
-	private final String directoryOutputResourcesCss = "./files/output/resources/css";
-	private final String directoryOutputResourcesImages = "./files/output/resources/images";
+	private final CliData cliData;
+
+	private final String directoryCache;
+	private final String directoryCacheResources;
+	private final String directoryCacheResourcesCss;
+	private final String directoryCacheResourcesImages;
+	private final String directoryOutput;
+	private final String directoryOutputResources;
+	private final String directoryOutputResourcesCss;
+	private final String directoryOutputResourcesImages;
 
 	private final String pathResourcesImages = "images";
 	private final String pathResourcesCss = "css";
 
+	private final CliUtils cliUtils = new CliUtils();
 	private final FileUtils fileUtils = new FileUtils();
 	private final CssUtils cssUtils = new CssUtils();
 	private final ImageUtils imageUtils = new ImageUtils();
@@ -58,11 +63,40 @@ public class WikiEater {
 	private final MenuUtils menuUtils = new MenuUtils();
 	private final IndexUtils indexUtils = new IndexUtils();
 
+	public WikiEater(String[] args) {
+
+		cliData = cliUtils.parseArguments(args);
+
+		this.directoryCache = cliData.directoryCache;
+		directoryCacheResources = directoryCache + "/resources";
+		directoryCacheResourcesCss = directoryCache + "/resources/css";
+		directoryCacheResourcesImages = directoryCache + "/resources/images";
+
+		this.directoryOutput = cliData.directoryOutput;
+		directoryOutputResources = directoryOutput + "/resources";
+		directoryOutputResourcesCss = directoryOutput + "/resources/css";
+		directoryOutputResourcesImages = directoryOutput + "/resources/images";
+
+		new File(directoryCache).mkdir();
+		new File(directoryCacheResources).mkdir();
+		new File(directoryCacheResourcesCss).mkdir();
+		new File(directoryCacheResourcesImages).mkdir();
+		new File(directoryOutput).mkdir();
+		new File(directoryOutputResources).mkdir();
+		new File(directoryOutputResourcesCss).mkdir();
+		new File(directoryOutputResourcesImages).mkdir();
+	}
+
 	void processUrls() throws IOException {
+
+		if (cliData.cleanCache) {
+			logger.info("Cleaning cache...");
+			fileUtils.deleteCache(new File(directoryCache));
+		}
 
 		logger.info("Reading pages...");
 
-		final File menuFile = new File("./files/menu.txt");
+		final File menuFile = new File(cliData.menuFile);
 		final Set<String> pageUrls = fileUtils.readUrls(menuFile);
 		final File cacheFolder = new File(directoryCache);
 		final List<PageData> pageDataList = new ArrayList<PageData>();
@@ -113,6 +147,8 @@ public class WikiEater {
 		urlUtils.replaceImageUrls(pageDataList, ImageDataSet, pathResourcesImages);
 		urlUtils.replaceCssUrl(pageDataList, cssResultFile.getName(), pathResourcesCss);
 
+		fileUtils.deleteOutput(new File(directoryOutput));
+
 		logger.info("Saving data..");
 
 		for (PageData pageData : pageDataList) {
@@ -130,16 +166,7 @@ public class WikiEater {
 
 	public static void main(String[] args) {
 
-		WikiEater wikiEater = new WikiEater();
-
-		new File(wikiEater.directoryCache).mkdir();
-		new File(wikiEater.directoryCacheResources).mkdir();
-		new File(wikiEater.directoryCacheResourcesCss).mkdir();
-		new File(wikiEater.directoryCacheResourcesImages).mkdir();
-		new File(wikiEater.directoryOutput).mkdir();
-		new File(wikiEater.directoryOutputResources).mkdir();
-		new File(wikiEater.directoryOutputResourcesCss).mkdir();
-		new File(wikiEater.directoryOutputResourcesImages).mkdir();
+		WikiEater wikiEater = new WikiEater(args);
 
 		try {
 			wikiEater.processUrls();

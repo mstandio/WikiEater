@@ -25,9 +25,11 @@ public class MediaUtilsTest {
 	public void makeMeidaUrlTest() throws Exception {
 		assertEquals("http://site.com/w/file.css",
 				mediaUtils.makeMediaUrl("/w/file.css", "http://site.com/wiki/some/page"));
-		
+
 		assertEquals("http://extsite.com/file.css",
 				mediaUtils.makeMediaUrl("http://extsite.com/file.css", "http://site.com/wiki/some/page"));
+
+		assertEquals("#site", mediaUtils.makeMediaUrl("#site", "http://site.com/wiki/some/page"));
 	}
 
 	@Test

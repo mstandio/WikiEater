@@ -40,20 +40,25 @@ public class UrlUtils extends MediaUtils {
 		StringBuffer stringBuffer = new StringBuffer();
 		int end = 0;
 		while (matcher.find()) {
-			matcher.appendReplacement(stringBuffer, hrefReplacer.getReplacement(matcher.group().trim()));
+			matcher.appendReplacement(stringBuffer,
+					hrefReplacer.getReplacement(matcher.group().trim(), pageData.getPageUrl()));
 			end = matcher.end();
 		}
 		stringBuffer.append(pageData.getPageContent().substring(end, pageData.getPageContent().length()));
 		return stringBuffer.toString();
 	}
 
-	String findHrefPageReplacement(String href, List<PageData> pageDataList) {
+	String findHrefPageReplacement(String href, String pageUrl, List<PageData> pageDataList) {
 		for (PageData pageData : pageDataList) {
 			if (pageUrlMatchesHref(pageData.getPageUrl(), href)) {
 				return translateHtmlFileNameToHref(pageData.getHtmlFileName(), href);
 			}
 		}
-		return href;
+		if (href.matches(".+\\.css$|.+\\.jpg$|.+\\.jpeg$|.+\\.gif|.+\\.png|.+\\.bmp")) {
+			return href;
+		} else {
+			return makeMediaUrl(href, pageUrl);
+		}
 	}
 
 	boolean pageUrlMatchesHref(String pageUrl, String href) {
@@ -86,7 +91,7 @@ public class UrlUtils extends MediaUtils {
 	}
 
 	interface HrefReplacer {
-		public String getReplacement(String href);
+		public String getReplacement(String href, String pageUrl);
 	}
 
 	class HrefPageReplacer implements HrefReplacer {
@@ -98,8 +103,8 @@ public class UrlUtils extends MediaUtils {
 		}
 
 		@Override
-		public String getReplacement(String href) {
-			return findHrefPageReplacement(href, pageDataList);
+		public String getReplacement(String href, String pageUrl) {
+			return findHrefPageReplacement(href, pageUrl, pageDataList);
 		}
 	}
 
@@ -114,7 +119,7 @@ public class UrlUtils extends MediaUtils {
 		}
 
 		@Override
-		public String getReplacement(String src) {
+		public String getReplacement(String src, String pageUrl) {
 			return findSrcImageReplacement(src, imageDataSet, outputDirectory);
 		}
 	}
@@ -128,7 +133,7 @@ public class UrlUtils extends MediaUtils {
 		}
 
 		@Override
-		public String getReplacement(String href) {
+		public String getReplacement(String href, String pageUrl) {
 			return findCssResultReplacement(href, cssResultUrl);
 		}
 	}

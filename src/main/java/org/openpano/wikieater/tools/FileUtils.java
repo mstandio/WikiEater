@@ -53,7 +53,7 @@ public class FileUtils {
 	}
 
 	private static final Logger logger = Logger.getLogger(FileUtils.class.getName());
-	
+
 	static {
 		Formatter formatter = new LoggerFormatter();
 		ConsoleHandler consoleHandler = new ConsoleHandler();
@@ -293,19 +293,20 @@ public class FileUtils {
 		String pageContent = pageData.getPageContent();
 		try {
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-			documentBuilderFactory.setValidating(false);
 			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 			documentBuilder.setEntityResolver(new EntityResolver() {
-				
+
 				@Override
-				public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {					
-					return new InputSource( new ByteArrayInputStream( "".getBytes() ) );
+				public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+					return new InputSource(new ByteArrayInputStream("".getBytes()));
 				}
 			});
 			Document document = documentBuilder.parse(new ByteArrayInputStream(pageContent.getBytes(ENC)));
 
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			transformerFactory.setAttribute("indent-number", 4);
 			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 			transformer.setOutputProperty(OutputKeys.METHOD, "html");
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
@@ -364,6 +365,37 @@ public class FileUtils {
 		} finally {
 			if (bufferedWriter != null) {
 				bufferedWriter.close();
+			}
+		}
+	}
+
+	public void deleteOutput(File directoryOutput) {
+		if (directoryOutput.isDirectory() && directoryOutput.exists()) {
+			for (File file : directoryOutput.listFiles()) {
+				if (file.isDirectory()
+						&& (file.getName().equals("resources") || file.getName().equals("images") || file.getName()
+								.equals("css"))) {
+					deleteOutput(file);
+				} else if (file.getName().toLowerCase()
+						.matches(".+\\.html$|.+\\.css$|.+\\.jpg$|.+\\.jpeg$|.+\\.gif|.+\\.png|.+\\.bmp")) {
+					file.delete();
+				}
+			}
+		}
+	}
+
+	public void deleteCache(File directoryCache) {
+		if (directoryCache.isDirectory() && directoryCache.exists()) {
+			for (File file : directoryCache.listFiles()) {
+				if (file.isDirectory()
+						&& (file.getName().equals("resources") || file.getName().equals("images") || file.getName()
+								.equals("css"))) {
+					deleteCache(file);
+				} else if (file.getName().toLowerCase()
+						.matches(".+\\.html$|.+\\.css$|.+\\.jpg$|.+\\.jpeg$|.+\\.gif|.+\\.png|.+\\.bmp")
+						|| file.getParent().endsWith("resources") || file.getParent().endsWith("css")) {
+					file.delete();
+				}
 			}
 		}
 	}

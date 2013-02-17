@@ -54,7 +54,7 @@ public class CssUtils extends MediaUtils {
 			if (group.matches(patternStyleOpen)) {
 				selector = cssContent.substring(start, matcher.start()).trim();
 			} else {
-				body = cssContent.substring(start, matcher.start());
+				body = cssContent.substring(start, matcher.start()).replaceAll("margin-left: 10em;", "");
 				CssData cssData = new CssData(selector, body);
 				analyseCssData(cssData);
 				cssDataSet.add(cssData);
@@ -70,9 +70,12 @@ public class CssUtils extends MediaUtils {
 		Pattern patternHref = Pattern.compile("(?<=href=\")([^\"]+)");
 		Matcher matcher = pattern.matcher(pageContent);
 		while (matcher.find()) {
-			Matcher matcherHref = patternHref.matcher(matcher.group());
-			if (matcherHref.find()) {
-				extractedCssLinks.add(matcherHref.group().trim());
+			String group = matcher.group();
+			if (!group.contains("media=\"print\"")) {
+				Matcher matcherHref = patternHref.matcher(group);
+				if (matcherHref.find()) {
+					extractedCssLinks.add(matcherHref.group().trim());
+				}
 			}
 		}
 		return extractedCssLinks;

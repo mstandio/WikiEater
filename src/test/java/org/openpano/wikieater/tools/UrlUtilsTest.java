@@ -61,7 +61,7 @@ public class UrlUtilsTest {
 		final List<String> requestedReplacements = new ArrayList<String>();
 
 		@Override
-		public String getReplacement(String href) {
+		public String getReplacement(String href, String pageUrl) {
 			requestedReplacements.add(href);
 			return href + href;
 		}
@@ -72,8 +72,8 @@ public class UrlUtilsTest {
 		pageDataList.add(new PageData("http://x/a", "a.html", ""));
 		pageDataList.add(new PageData("http://x/b", "b.html", ""));
 
-		assertEquals("a.html", urlUtils.findHrefPageReplacement("/a", pageDataList));
-		assertEquals("/c", urlUtils.findHrefPageReplacement("/c", pageDataList));
+		assertEquals("a.html", urlUtils.findHrefPageReplacement("/a",null, pageDataList));
+		assertEquals("http://some/c", urlUtils.findHrefPageReplacement("/c", "http://some/site", pageDataList));
 	}
 
 	@Test

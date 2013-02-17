@@ -18,7 +18,7 @@ public abstract class MediaUtils {
 
 	String makeMediaUrl(String mediaLink, String pageUrl) {
 		mediaLink = mediaLink.replaceAll("&amp;", "&");
-		if (mediaLink.matches("http(s)?://.+")) {
+		if (mediaLink.matches("http(s)?://.+") || mediaLink.startsWith("#") || mediaLink.startsWith("[")) {
 			return mediaLink;
 		} else {
 			String disassembledUrl[] = pageUrl.split("/");

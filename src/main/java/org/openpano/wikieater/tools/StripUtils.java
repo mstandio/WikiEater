@@ -46,6 +46,7 @@ public class StripUtils {
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "mw-panel");
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "portal");
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "footer");
+		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "magnify");
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "mw-head");
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.table, "whos_here");
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.span, "editsection");
