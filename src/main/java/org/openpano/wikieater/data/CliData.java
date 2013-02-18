@@ -5,8 +5,8 @@ package org.openpano.wikieater.data;
  */
 public class CliData {
 
-	public String directoryCache;
-	public String directoryOutput;
+	public String cacheDir;
+	public String outputDir;
 	public String menuFile;
 
 	public Boolean showHelp = false;

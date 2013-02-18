@@ -16,8 +16,6 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.ConsoleHandler;
@@ -36,6 +34,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.openpano.wikieater.data.CssData;
 import org.openpano.wikieater.data.PageData;
+import org.openpano.wikieater.util.LoggerFormatter;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -71,6 +70,9 @@ public class FileUtils {
 			cacheFileName = makeCssCacheFileName(url);
 		} else {
 			throw new RuntimeException("Unsupported fileType: " + fileType);
+		}
+		if (cacheFileName == null) {
+			return "";
 		}
 		Set<String> cachedUrls = listCachedUrls(cacheFolder);
 		if (cachedUrls.contains(url)) {
@@ -210,10 +212,14 @@ public class FileUtils {
 		String fileName = url.toLowerCase();
 		fileName = removeNamedAnchorFromUrl(fileName);
 		fileName = fileName.replaceAll("_", "-");
+		fileName = fileName.replaceAll("\\s+", "-");
+		fileName = fileName.replaceAll(":", "_");
+		fileName = fileName.replaceAll(";", "_");
+		fileName = fileName.replaceAll("[\\*\\?\\|\"/\\\\]+", "");
+		fileName += ".html";
 		if (url.contains("/")) {
 			fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
 		}
-		fileName = fileName.replaceAll(":", "_");
 		return fileName;
 	}
 
@@ -225,17 +231,13 @@ public class FileUtils {
 	}
 
 	String makeCssCacheFileName(String url) {
-		try {
-			MessageDigest md = MessageDigest.getInstance("MD5");
-			md.update(url.getBytes());
-			byte[] digest = md.digest();
-			StringBuffer stringBuffer = new StringBuffer();
-			for (byte b : digest) {
-				stringBuffer.append(Integer.toHexString((int) (b & 0xff)));
-			}
-			return stringBuffer.toString();
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
+		url = url.replaceAll("=", ".");
+		Pattern pattern = Pattern.compile("[^\\*\\?\\|\"/\\\\:;\\s]+\\.css", Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(url);
+		if (matcher.find()) {
+			return matcher.group();
+		} else {
+			return null;
 		}
 	}
 
@@ -282,7 +284,7 @@ public class FileUtils {
 	}
 
 	public String makeHtmlFileName(String url) {
-		return makeHtmlCacheFileName(url) + ".html";
+		return makeHtmlCacheFileName(url);
 	}
 
 	public String makeImageFileName(String url) {
@@ -369,31 +371,15 @@ public class FileUtils {
 		}
 	}
 
-	public void deleteOutput(File directoryOutput) {
-		if (directoryOutput.isDirectory() && directoryOutput.exists()) {
-			for (File file : directoryOutput.listFiles()) {
+	public void cleanDirectory(File directory) {
+		if (directory.isDirectory() && directory.exists()) {
+			for (File file : directory.listFiles()) {
 				if (file.isDirectory()
 						&& (file.getName().equals("resources") || file.getName().equals("images") || file.getName()
 								.equals("css"))) {
-					deleteOutput(file);
+					cleanDirectory(file);
 				} else if (file.getName().toLowerCase()
 						.matches(".+\\.html$|.+\\.css$|.+\\.jpg$|.+\\.jpeg$|.+\\.gif|.+\\.png|.+\\.bmp")) {
-					file.delete();
-				}
-			}
-		}
-	}
-
-	public void deleteCache(File directoryCache) {
-		if (directoryCache.isDirectory() && directoryCache.exists()) {
-			for (File file : directoryCache.listFiles()) {
-				if (file.isDirectory()
-						&& (file.getName().equals("resources") || file.getName().equals("images") || file.getName()
-								.equals("css"))) {
-					deleteCache(file);
-				} else if (file.getName().toLowerCase()
-						.matches(".+\\.html$|.+\\.css$|.+\\.jpg$|.+\\.jpeg$|.+\\.gif|.+\\.png|.+\\.bmp")
-						|| file.getParent().endsWith("resources") || file.getParent().endsWith("css")) {
 					file.delete();
 				}
 			}

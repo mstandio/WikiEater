@@ -69,22 +69,24 @@ public class FileUtilsTest {
 
 	@Test
 	public void makeCssCacheFileNameTest() throws Exception {
-		assertEquals(fileUtils.makeCssCacheFileName("XYZ"), fileUtils.makeCssCacheFileName("XYZ"));
+		assertEquals("Print.css", fileUtils.makeCssCacheFileName("/w/index.php?title=MediaWiki:Print.css&amp;"));
+		assertEquals("combined.min.css", fileUtils.makeCssCacheFileName("/css/combined.min.css?69"));
+		assertEquals("gen.css", fileUtils.makeCssCacheFileName("action=raw&amp;maxage=18000&amp;gen=css"));
+		assertEquals(null, fileUtils.makeCssCacheFileName(""));
 	}
-	
+
 	@Test
 	public void cleanCssContentTest() throws Exception {
 		String cssContent = "A/*B*/C/*D*/E";
-		
-		String expectedResult= "ACE";
-		
-		assertEquals(expectedResult, fileUtils.cleanCssContent(cssContent));		
+
+		String expectedResult = "ACE";
+
+		assertEquals(expectedResult, fileUtils.cleanCssContent(cssContent));
 	}
 
 	@Test
 	public void makeImageCacheFileNameTest() throws Exception {
-		assertEquals("image.png",
-				fileUtils.makeHtmlCacheFileName("http://panozona.com/wiki/file/image.png"));
+		assertEquals("image.png", fileUtils.makeHtmlCacheFileName("http://panozona.com/wiki/file/image.png"));
 	}
 
 	@Test

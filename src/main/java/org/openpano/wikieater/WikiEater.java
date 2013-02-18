@@ -20,10 +20,10 @@ import org.openpano.wikieater.tools.FileUtils;
 import org.openpano.wikieater.tools.FileUtils.FileType;
 import org.openpano.wikieater.tools.ImageUtils;
 import org.openpano.wikieater.tools.IndexUtils;
-import org.openpano.wikieater.tools.LoggerFormatter;
 import org.openpano.wikieater.tools.MenuUtils;
 import org.openpano.wikieater.tools.StripUtils;
 import org.openpano.wikieater.tools.UrlUtils;
+import org.openpano.wikieater.util.LoggerFormatter;
 
 /**
  * @author mstandio
@@ -42,11 +42,11 @@ public class WikiEater {
 
 	private final CliData cliData;
 
-	private final String directoryCache;
+	private final File directoryCache;
 	private final String directoryCacheResources;
 	private final String directoryCacheResourcesCss;
 	private final String directoryCacheResourcesImages;
-	private final String directoryOutput;
+	private final File directoryOutput;
 	private final String directoryOutputResources;
 	private final String directoryOutputResourcesCss;
 	private final String directoryOutputResourcesImages;
@@ -54,7 +54,6 @@ public class WikiEater {
 	private final String pathResourcesImages = "images";
 	private final String pathResourcesCss = "css";
 
-	private final CliUtils cliUtils = new CliUtils();
 	private final FileUtils fileUtils = new FileUtils();
 	private final CssUtils cssUtils = new CssUtils();
 	private final ImageUtils imageUtils = new ImageUtils();
@@ -63,42 +62,61 @@ public class WikiEater {
 	private final MenuUtils menuUtils = new MenuUtils();
 	private final IndexUtils indexUtils = new IndexUtils();
 
-	public WikiEater(String[] args) {
+	public WikiEater(CliData cliData) {
+		this.cliData = cliData;
 
-		cliData = cliUtils.parseArguments(args);
+		if (cliData.cacheDir == null) {
+			cliData.cacheDir = "./cache";
+			new File(cliData.cacheDir).mkdir();
+		}
 
-		this.directoryCache = cliData.directoryCache;
+		if (cliData.outputDir == null) {
+			cliData.outputDir = "./output";
+			new File(cliData.outputDir).mkdir();
+		}
+
+		if (cliData.menuFile == null) {
+			cliData.outputDir = "./menu.txt";
+		}
+		directoryCache = new File(cliData.cacheDir);
+		if (!directoryCache.exists() || !directoryCache.isDirectory()) {
+			throw new IllegalArgumentException("Directory is not valid: " + directoryCache);
+		}
+
 		directoryCacheResources = directoryCache + "/resources";
 		directoryCacheResourcesCss = directoryCache + "/resources/css";
 		directoryCacheResourcesImages = directoryCache + "/resources/images";
 
-		this.directoryOutput = cliData.directoryOutput;
+		directoryOutput = new File(cliData.outputDir);
+		if (!directoryOutput.exists() || !directoryOutput.isDirectory()) {
+			throw new IllegalArgumentException("Directory is not valid: " + directoryOutput);
+		}
+
 		directoryOutputResources = directoryOutput + "/resources";
 		directoryOutputResourcesCss = directoryOutput + "/resources/css";
 		directoryOutputResourcesImages = directoryOutput + "/resources/images";
 
-		new File(directoryCache).mkdir();
 		new File(directoryCacheResources).mkdir();
 		new File(directoryCacheResourcesCss).mkdir();
 		new File(directoryCacheResourcesImages).mkdir();
-		new File(directoryOutput).mkdir();
+
 		new File(directoryOutputResources).mkdir();
 		new File(directoryOutputResourcesCss).mkdir();
 		new File(directoryOutputResourcesImages).mkdir();
 	}
 
-	void processUrls() throws IOException {
+	public void processMenuFile() throws IOException {
 
 		if (cliData.cleanCache) {
 			logger.info("Cleaning cache...");
-			fileUtils.deleteCache(new File(directoryCache));
+			fileUtils.cleanDirectory(directoryCache);
 		}
 
 		logger.info("Reading pages...");
 
 		final File menuFile = new File(cliData.menuFile);
 		final Set<String> pageUrls = fileUtils.readUrls(menuFile);
-		final File cacheFolder = new File(directoryCache);
+		final File cacheFolder = directoryCache;
 		final List<PageData> pageDataList = new ArrayList<PageData>();
 		for (String pageUrl : pageUrls) {
 			pageDataList.add(new PageData(pageUrl, fileUtils.makeHtmlFileName(pageUrl), fileUtils.getUrlContent(
@@ -147,7 +165,7 @@ public class WikiEater {
 		urlUtils.replaceImageUrls(pageDataList, ImageDataSet, pathResourcesImages);
 		urlUtils.replaceCssUrl(pageDataList, cssResultFile.getName(), pathResourcesCss);
 
-		fileUtils.deleteOutput(new File(directoryOutput));
+		fileUtils.cleanDirectory(directoryOutput);
 
 		logger.info("Saving data..");
 
@@ -159,17 +177,18 @@ public class WikiEater {
 		}
 		fileUtils.saveCssDataIntoFile(cssDataSetResult, cssResultFile);
 		fileUtils.saveAsHtmlFile(menuUtils.getMenuPageData(menuFile, pageDataList), directoryOutputResources);
-		fileUtils.saveAsHtmlFile(indexUtils.getIndexPageData(menuFile, pageDataList), directoryOutput);
+		fileUtils.saveAsHtmlFile(indexUtils.getIndexPageData(menuFile, pageDataList), directoryOutput.getName());
 
 		logger.info("Done!");
 	}
 
 	public static void main(String[] args) {
 
-		WikiEater wikiEater = new WikiEater(args);
+		CliUtils cliUtils = new CliUtils();
+		WikiEater wikiEater = new WikiEater(cliUtils.parseArguments(args));
 
 		try {
-			wikiEater.processUrls();
+			wikiEater.processMenuFile();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

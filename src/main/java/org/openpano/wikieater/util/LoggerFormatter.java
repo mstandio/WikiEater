@@ -1,4 +1,4 @@
-package org.openpano.wikieater.tools;
+package org.openpano.wikieater.util;
 
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;

@@ -23,8 +23,8 @@ public class CliUtils {
 	public CliData parseArguments(String[] args) {
 		CliData cliData = new CliData();
 		cliData.menuFile = "./files/menu.txt";
-		cliData.directoryCache = "./files/cache";
-		cliData.directoryOutput = "./files/output";
+		cliData.cacheDir = "./files/cache";
+		cliData.outputDir = "./files/output";
 		return cliData;
 	}
 }
