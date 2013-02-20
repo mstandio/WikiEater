@@ -35,14 +35,14 @@ public class StripUtilsTest {
 
 		assertEquals(expectedResult, stripUtils.removeScriptsFromPagecontent(pageContent));
 	}
-	
+
 	@Test
 	public void removeCommentsFromPagecontent() throws Exception {
 		String pageContent = "A<!--B-->C";
 
 		String expectedResult = "AC";
 
-		assertEquals(expectedResult, stripUtils.removeCommentsFromPagecontent(pageContent));		
+		assertEquals(expectedResult, stripUtils.removeCommentsFromPagecontent(pageContent));
 	}
 
 	@Test
@@ -63,6 +63,16 @@ public class StripUtilsTest {
 		String expectedResult = "<div>" + "<div class=\"c\"></div>" + "</div>";
 
 		assertEquals(expectedResult, stripUtils.removeElementsFromPageContent(pageContent, ElementType.div, "a"));
+	}
+
+	@Test
+	public void peelElementsFromPageContentTest() throws Exception {
+		String pageContent = "<div>" + "<div id=\"a\"></div>" + "<div class=\"a\">" + "<div class=\"b\"></div>"
+				+ "</div>" + "<div class=\"c\"></div>" + "</div>";
+
+		String expectedResult = "<div>" + "<div class=\"b\"></div>" + "<div class=\"c\"></div>" + "</div>";
+
+		assertEquals(expectedResult, stripUtils.peelElementsFromPageContent(pageContent, ElementType.div, "a"));
 	}
 
 	@Test

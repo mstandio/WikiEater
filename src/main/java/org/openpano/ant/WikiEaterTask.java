@@ -1,4 +1,4 @@
-package ant;
+package org.openpano.ant;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;

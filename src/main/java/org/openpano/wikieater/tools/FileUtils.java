@@ -215,7 +215,7 @@ public class FileUtils {
 		fileName = fileName.replaceAll("\\s+", "-");
 		fileName = fileName.replaceAll(":", "_");
 		fileName = fileName.replaceAll(";", "_");
-		fileName = fileName.replaceAll("[\\*\\?\\|\"/\\\\]+", "");
+		fileName = fileName.replaceAll("[\\*\\?\\|\"\\\\]+", "");
 		fileName += ".html";
 		if (url.contains("/")) {
 			fileName = fileName.substring(fileName.lastIndexOf("/") + 1);

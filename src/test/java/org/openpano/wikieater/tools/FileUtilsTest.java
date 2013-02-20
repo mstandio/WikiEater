@@ -63,7 +63,7 @@ public class FileUtilsTest {
 
 	@Test
 	public void makeHtmlCacheFileNameTest() throws Exception {
-		assertEquals("module_image-gallery",
+		assertEquals("module_image-gallery.html",
 				fileUtils.makeHtmlCacheFileName("http://panozona.com/wiki/Module:Image_Gallery#group"));
 	}
 
@@ -86,7 +86,7 @@ public class FileUtilsTest {
 
 	@Test
 	public void makeImageCacheFileNameTest() throws Exception {
-		assertEquals("image.png", fileUtils.makeHtmlCacheFileName("http://panozona.com/wiki/file/image.png"));
+		assertEquals("image.png", fileUtils.makeImageCacheFileName("http://panozona.com/wiki/file/image.png"));
 	}
 
 	@Test
@@ -113,7 +113,7 @@ public class FileUtilsTest {
 		final String sampleUrl = "http://file4";
 		final String sampleContent = "sampleContent";
 
-		File tmpFile4 = testFolder.newFile("file4");
+		File tmpFile4 = testFolder.newFile("file4.html");
 		fileUtils.saveToCache(tmpFile4, sampleUrl, sampleContent);
 
 		assertEquals(sampleContent, fileUtils.getUrlContent(sampleUrl, testFolder.getRoot(), FileType.HTML));
@@ -157,7 +157,7 @@ public class FileUtilsTest {
 
 	@Test
 	public void makeHtmlFileNameTest() throws Exception {
-		assertEquals("module_imagegallery",
+		assertEquals("module_imagegallery.html",
 				fileUtils.makeHtmlCacheFileName("http://panozona.com/wiki/Module:ImageGallery#group"));
 	}
 }

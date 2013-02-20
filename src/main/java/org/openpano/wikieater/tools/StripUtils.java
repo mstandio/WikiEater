@@ -50,6 +50,7 @@ public class StripUtils {
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "mw-head");
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.table, "whos_here");
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.span, "editsection");
+		pageContent = peelElementsFromPageContent(pageContent, ElementType.a, "image");
 		pageContent = cleanupPageContent(pageContent);
 		return pageContent;
 	}
@@ -141,7 +142,7 @@ public class StripUtils {
 	}
 
 	enum ElementType {
-		body, div, span, table
+		body, div, span, table, a
 	}
 
 	String removeElementsFromPageContent(String pageContent, ElementType elementType, String elementName) {
@@ -167,6 +168,41 @@ public class StripUtils {
 				} else if (group.matches(patternTagClose)) {
 					tagCounter--;
 					if (tagCounter == 0) {
+						start = matcher.end();
+						found = false;
+					}
+				}
+			}
+		}
+		stringBuffer.append(pageContent.substring(start, pageContent.length()));
+		return stringBuffer.toString();
+	}
+
+	String peelElementsFromPageContent(String pageContent, ElementType elementType, String elementName) {
+		String patternTagOpen = "<" + elementType.name() + "[^>/]*>";
+		String patternTagClose = "</" + elementType.name() + ">";
+
+		Pattern pattern = Pattern.compile(patternTagOpen + "|" + patternTagClose, Pattern.CASE_INSENSITIVE);
+		StringBuffer stringBuffer = new StringBuffer();
+		Matcher matcher = pattern.matcher(pageContent);
+		boolean found = false;
+		int tagCounter = 0;
+		int start = 0;
+		while (matcher.find()) {
+			String group = matcher.group();
+			if (!found
+					&& (group.contains("id=\"" + elementName + "\"") || group.contains("class=\"" + elementName + "\""))) {
+				found = true;
+				stringBuffer.append(pageContent.substring(start, matcher.start()));
+				start = matcher.end();
+				tagCounter++;
+			} else if (found) {
+				if (group.matches(patternTagOpen)) {
+					tagCounter++;
+				} else if (group.matches(patternTagClose)) {
+					tagCounter--;
+					if (tagCounter == 0) {
+						stringBuffer.append(pageContent.substring(start, matcher.start()));
 						start = matcher.end();
 						found = false;
 					}
