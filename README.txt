@@ -11,30 +11,34 @@ usage:
 
   java -jar MediaWiki.jar -h
   java -jar MediaWiki.jar -menufile ./menu.txt -output ./output -cache ./cache
-	
+
 ant task:
 
-   <project name="MediaWikiDemo" default="makeDocs">	
+  <project name="MediaWikiDemo" default="makeDocs">
       <taskdef name="wikieater" 
-         classpath="WikiEater.jar"
-         classname="org.openapno.ant.WikiEater"/>
+          classpath="WikiEater.jar"
+          classname="org.openapno.ant.WikiEater"/>
       <task name="makeDocs">
-         <wikieater>
-            <menufile value="./menu.txt"/>
-            <output value="./output"/>
-            <cache value="./cache"/>
-            <refreshcache value="false"/>				
-         </wikieater>			
-      </task>		
-   </project>
+          <wikieater>
+              <menufile value="./menu.txt"/>
+              <output value="./output"/>
+              <cache value="./cache"/>
+              <refreshcache value="false"/>
+          </wikieater>
+      </task>
+  </project>
 
 features:
 
-	* matching and replacing urls between articles
-	* saving images and replacing their urls
-	* compiling used styling into single *.css file
-	* cleaning and formatting *.html output
-	* generating simple navigation menu
-	* removing selected DOM elements and their children
-	* caching of all downloaded files 
-	
+  * matching and replacing urls between articles
+  * saving images and replacing their urls
+  * compiling used styling into single *.css file
+  * cleaning and formatting *.html output
+  * generating simple navigation menu
+  * removing selected DOM elements and their children
+  * caching of all downloaded files 
+  
+build:
+
+  mvn pom.xml clean install assembly:single ? (TODO)
+  
