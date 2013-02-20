@@ -291,7 +291,7 @@ public class FileUtils {
 		return makeImageCacheFileName(url);
 	}
 
-	public void saveAsHtmlFile(PageData pageData, String outputDirecotry) throws IOException {
+	public void saveAsHtmlFile(PageData pageData, File outputDirecotry) throws IOException {
 		String pageContent = pageData.getPageContent();
 		try {
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -325,8 +325,8 @@ public class FileUtils {
 
 		BufferedWriter bufferedWriter = null;
 		try {
-			bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(new File(
-					outputDirecotry), pageData.getHtmlFileName())), ENC));
+			bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(outputDirecotry,
+					pageData.getHtmlFileName())), ENC));
 			bufferedWriter.write(pageContent);
 			logger.info("Saved file " + pageData.getHtmlFileName());
 		} finally {
@@ -336,12 +336,12 @@ public class FileUtils {
 		}
 	}
 
-	public void copyFile(File file, String targetDirectory) throws IOException {
+	public void copyFile(File file, File targetDirectory) throws IOException {
 		InputStream inStream = null;
 		OutputStream outStream = null;
 		try {
 			inStream = new FileInputStream(file);
-			outStream = new FileOutputStream(new File(new File(targetDirectory), file.getName()));
+			outStream = new FileOutputStream(new File(targetDirectory, file.getName()));
 			byte[] buffer = new byte[1024];
 			int length;
 			while ((length = inStream.read(buffer)) > 0) {

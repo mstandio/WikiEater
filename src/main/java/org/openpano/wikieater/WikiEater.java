@@ -42,14 +42,15 @@ public class WikiEater {
 
 	private final CliData cliData;
 
+	private final File menuFile;
 	private final File directoryCache;
-	private final String directoryCacheResources;
-	private final String directoryCacheResourcesCss;
-	private final String directoryCacheResourcesImages;
+	private final File directoryCacheResources;
+	private final File directoryCacheResourcesCss;
+	private final File directoryCacheResourcesImages;
 	private final File directoryOutput;
-	private final String directoryOutputResources;
-	private final String directoryOutputResourcesCss;
-	private final String directoryOutputResourcesImages;
+	private final File directoryOutputResources;
+	private final File directoryOutputResourcesCss;
+	private final File directoryOutputResourcesImages;
 
 	private final String pathResourcesImages = "images";
 	private final String pathResourcesCss = "css";
@@ -67,54 +68,62 @@ public class WikiEater {
 
 		if (cliData.cacheDir == null) {
 			cliData.cacheDir = "./cache";
-			new File(cliData.cacheDir).mkdir();
 		}
 
 		if (cliData.outputDir == null) {
 			cliData.outputDir = "./output";
-			new File(cliData.outputDir).mkdir();
 		}
 
 		if (cliData.menuFile == null) {
-			cliData.outputDir = "./menu.txt";
+			cliData.menuFile = "./menu.txt";
 		}
-		directoryCache = new File(cliData.cacheDir);
-		if (!directoryCache.exists() || !directoryCache.isDirectory()) {
-			throw new IllegalArgumentException("Directory is not valid: " + directoryCache);
-		}
+		menuFile = new File(cliData.menuFile);
 
-		directoryCacheResources = directoryCache + "/resources";
-		directoryCacheResourcesCss = directoryCache + "/resources/css";
-		directoryCacheResourcesImages = directoryCache + "/resources/images";
+		directoryCache = new File(cliData.cacheDir);
+		directoryCacheResources = new File(directoryCache + "/resources");
+		directoryCacheResourcesCss = new File(directoryCache + "/resources/css");
+		directoryCacheResourcesImages = new File(directoryCache + "/resources/images");
 
 		directoryOutput = new File(cliData.outputDir);
-		if (!directoryOutput.exists() || !directoryOutput.isDirectory()) {
-			throw new IllegalArgumentException("Directory is not valid: " + directoryOutput);
-		}
-
-		directoryOutputResources = directoryOutput + "/resources";
-		directoryOutputResourcesCss = directoryOutput + "/resources/css";
-		directoryOutputResourcesImages = directoryOutput + "/resources/images";
-
-		new File(directoryCacheResources).mkdir();
-		new File(directoryCacheResourcesCss).mkdir();
-		new File(directoryCacheResourcesImages).mkdir();
-
-		new File(directoryOutputResources).mkdir();
-		new File(directoryOutputResourcesCss).mkdir();
-		new File(directoryOutputResourcesImages).mkdir();
+		directoryOutputResources = new File(directoryOutput + "/resources");
+		directoryOutputResourcesCss = new File(directoryOutput + "/resources/css");
+		directoryOutputResourcesImages = new File(directoryOutput + "/resources/images");
 	}
 
 	public void processMenuFile() throws IOException {
+		if (cliData.showHelp) {
+			return;
+		}
 
-		if (cliData.cleanCache) {
-			logger.info("Cleaning cache...");
+		if (!menuFile.exists() || !menuFile.isFile()) {
+			throw new IllegalArgumentException("menu file is not valid: " + menuFile.getAbsolutePath());
+		}
+
+		directoryCache.mkdir();
+		if (!directoryCache.exists() || !directoryCache.isDirectory()) {
+			throw new IllegalArgumentException("Directory is not valid: " + directoryCache.getAbsolutePath());
+		}
+
+		directoryCacheResources.mkdir();
+		directoryCacheResourcesCss.mkdir();
+		directoryCacheResourcesImages.mkdir();
+
+		directoryOutput.mkdir();
+		if (!directoryOutput.exists() || !directoryOutput.isDirectory()) {
+			throw new IllegalArgumentException("Directory is not valid: " + directoryOutput.getAbsolutePath());
+		}
+
+		directoryOutputResources.mkdir();
+		directoryOutputResourcesCss.mkdir();
+		directoryOutputResourcesImages.mkdir();
+
+		if (cliData.refreshCache) {
+			logger.info("Removing cache...");
 			fileUtils.cleanDirectory(directoryCache);
 		}
 
 		logger.info("Reading pages...");
 
-		final File menuFile = new File(cliData.menuFile);
 		final Set<String> pageUrls = fileUtils.readUrls(menuFile);
 		final File cacheFolder = directoryCache;
 		final List<PageData> pageDataList = new ArrayList<PageData>();
@@ -126,10 +135,10 @@ public class WikiEater {
 		logger.info("Reading css...");
 
 		final Set<String> cssUrls = cssUtils.harvestCssUrls(pageDataList);
-		final File cacheFolderCss = new File(directoryCacheResourcesCss);
 		final Set<CssData> cssDataSet = new HashSet<CssData>();
 		for (String cssUrl : cssUrls) {
-			cssDataSet.addAll(cssUtils.extractCssData(fileUtils.getUrlContent(cssUrl, cacheFolderCss, FileType.CSS)));
+			cssDataSet.addAll(cssUtils.extractCssData(fileUtils.getUrlContent(cssUrl, directoryCacheResourcesCss,
+					FileType.CSS)));
 		}
 		for (PageData pageData : pageDataList) {
 			cssDataSet.addAll(cssUtils.extractCssData(cssUtils.extractEmbededCss(pageData.getPageContent())));
@@ -152,11 +161,10 @@ public class WikiEater {
 		logger.info("Reading images...");
 
 		final Set<String> imageUrls = imageUtils.harvestImageUrls(pageDataList);
-		final File cacheFolderImages = new File(directoryCacheResourcesImages);
 		final Set<ImageData> ImageDataSet = new HashSet<ImageData>();
 		for (String imageUrl : imageUrls) {
 			ImageDataSet.add(new ImageData(fileUtils.makeImageFileName(imageUrl), fileUtils.getUrlFile(imageUrl,
-					cacheFolderImages, FileType.IMAGE)));
+					directoryCacheResourcesImages, FileType.IMAGE)));
 		}
 
 		logger.info("Assembling pages..");
@@ -177,7 +185,7 @@ public class WikiEater {
 		}
 		fileUtils.saveCssDataIntoFile(cssDataSetResult, cssResultFile);
 		fileUtils.saveAsHtmlFile(menuUtils.getMenuPageData(menuFile, pageDataList), directoryOutputResources);
-		fileUtils.saveAsHtmlFile(indexUtils.getIndexPageData(menuFile, pageDataList), directoryOutput.getName());
+		fileUtils.saveAsHtmlFile(indexUtils.getIndexPageData(menuFile, pageDataList), directoryOutput);
 
 		logger.info("Done!");
 	}

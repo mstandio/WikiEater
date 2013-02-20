@@ -13,20 +13,20 @@ public class WikiEaterTask extends Task {
 	private String cachedir;
 	private String outputdir;
 	private String menufile;
-	private Boolean cleancache;
+	private Boolean refreshcache;
 
 	@Override
 	public void execute() throws BuildException {
 		try {
 			CliData cliData = new CliData();
-			cliData.cacheDir = cachedir; 
+			cliData.cacheDir = cachedir;
 			cliData.outputDir = outputdir;
 			cliData.menuFile = menufile;
-			cliData.cleanCache = cleancache;
-			
+			cliData.refreshCache = refreshcache;
+
 			WikiEater wikiEater = new WikiEater(cliData);
 			wikiEater.processMenuFile();
-			
+
 		} catch (Exception e) {
 			throw new BuildException(e);
 		}
@@ -44,7 +44,7 @@ public class WikiEaterTask extends Task {
 		this.menufile = menufile;
 	}
 
-	public Boolean getCleancache() {
-		return cleancache;
+	public Boolean getRefreshcache() {
+		return refreshcache;
 	}
 }

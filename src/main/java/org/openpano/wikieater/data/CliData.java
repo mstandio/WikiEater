@@ -8,7 +8,6 @@ public class CliData {
 	public String cacheDir;
 	public String outputDir;
 	public String menuFile;
-
 	public Boolean showHelp = false;
-	public Boolean cleanCache = false;
+	public Boolean refreshCache = false;
 }
