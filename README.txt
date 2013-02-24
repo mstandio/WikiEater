@@ -9,12 +9,12 @@ used in project build cycle for generating per-release documentation.
 
 usage: 
 
-  java -jar MediaWiki.jar -h
+  java -jar MediaWiki.jar -help
   java -jar MediaWiki.jar -menufile ./menu.txt -output ./output -cache ./cache
 
 ant task:
 
-  <project name="MediaWikiDemo" default="makeDocs">
+  <project name="WikiEaterDemo" default="makeDocs">
       <taskdef name="wikieater" 
           classpath="WikiEater.jar"
           classname="org.openapno.ant.WikiEater"/>
@@ -40,5 +40,5 @@ features:
   
 build:
 
-  mvn pom.xml clean install assembly:single ? (TODO)
+  mvn clean install
   

@@ -66,12 +66,12 @@ public class CliUtils {
 				cliData.refreshCache = true;
 			}
 		} catch (ParseException e) {
-			System.out.println("Unexpected exception:" + e.getMessage());
+			System.out.println("Invalid command: " + e.getMessage());
 			cliData.showHelp = true;
 		} finally {
 			if (cliData.showHelp) {
 				HelpFormatter formatter = new HelpFormatter();
-				formatter.printHelp("WikiEater [OPTIONS]", options);
+				formatter.printHelp("WikiEater [-option] [file|directory]", options);
 			}
 		}
 		return cliData;
