@@ -9,22 +9,20 @@ used in project build cycle for generating per-release documentation.
 
 usage: 
 
-  java -jar MediaWiki.jar -help
-  java -jar MediaWiki.jar -menufile ./menu.txt -output ./output -cache ./cache
+  java -jar WikiEater-1.0.jar -help
+  java -jar WikiEater-1.0.jar -menufile example/menu.txt
 
 ant task:
 
   <project name="WikiEaterDemo" default="makeDocs">
       <taskdef name="wikieater" 
-          classpath="WikiEater.jar"
-          classname="org.openapno.ant.WikiEater"/>
+          classpath="WikiEater-1.0.jar"
+          classname="org.openpano.ant.WikiEaterTask"/>
       <task name="makeDocs">
-          <wikieater>
-              <menufile value="./menu.txt"/>
-              <output value="./output"/>
-              <cache value="./cache"/>
-              <refreshcache value="false"/>
-          </wikieater>
+          <wikieater
+              menufile="./menu.txt"
+              outputdir="./output"
+              cachedir="./cache"/>
       </task>
   </project>
 

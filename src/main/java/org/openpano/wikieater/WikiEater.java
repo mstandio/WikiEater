@@ -49,6 +49,7 @@ public class WikiEater {
 	private final File directoryCacheResourcesImages;
 	private final File directoryOutput;
 	private final File directoryOutputResources;
+	private final File directoryOutputResourcesJs;
 	private final File directoryOutputResourcesCss;
 	private final File directoryOutputResourcesImages;
 
@@ -86,6 +87,7 @@ public class WikiEater {
 
 		directoryOutput = new File(cliData.outputDir);
 		directoryOutputResources = new File(directoryOutput + "/resources");
+		directoryOutputResourcesJs = new File(directoryOutput + "/resources/js");
 		directoryOutputResourcesCss = new File(directoryOutput + "/resources/css");
 		directoryOutputResourcesImages = new File(directoryOutput + "/resources/images");
 	}
@@ -114,6 +116,7 @@ public class WikiEater {
 		}
 
 		directoryOutputResources.mkdir();
+		directoryOutputResourcesJs.mkdir();
 		directoryOutputResourcesCss.mkdir();
 		directoryOutputResourcesImages.mkdir();
 
@@ -183,6 +186,7 @@ public class WikiEater {
 		for (ImageData imageData : ImageDataSet) {
 			fileUtils.copyFile(imageData.getImageFile(), directoryOutputResourcesImages);
 		}
+		indexUtils.copyResource("/js/script.js", directoryOutputResourcesJs);
 		fileUtils.saveCssDataIntoFile(cssDataSetResult, cssResultFile);
 		fileUtils.saveAsHtmlFile(menuUtils.getMenuPageData(menuFile, pageDataList), directoryOutputResources);
 		fileUtils.saveAsHtmlFile(indexUtils.getIndexPageData(menuFile, pageDataList), directoryOutput);

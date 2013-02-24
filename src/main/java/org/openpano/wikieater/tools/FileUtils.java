@@ -232,7 +232,7 @@ public class FileUtils {
 
 	String makeCssCacheFileName(String url) {
 		url = url.replaceAll("=", ".");
-		Pattern pattern = Pattern.compile("[^\\*\\?\\|\"/\\\\:;\\s]+\\.css", Pattern.CASE_INSENSITIVE);
+		Pattern pattern = Pattern.compile("[^\\*\\?\\|\"/\\\\:;\\s&]+\\.css", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(url);
 		if (matcher.find()) {
 			return matcher.group();

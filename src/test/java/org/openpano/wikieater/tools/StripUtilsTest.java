@@ -67,12 +67,12 @@ public class StripUtilsTest {
 
 	@Test
 	public void peelElementsFromPageContentTest() throws Exception {
-		String pageContent = "<div>" + "<div id=\"a\"></div>" + "<div class=\"a\">" + "<div class=\"b\"></div>"
-				+ "</div>" + "<div class=\"c\"></div>" + "</div>";
+		String pageContent = "<div>" + "<a class=\"image\"></a>" + "<a id=\"image\">" + "<div class=\"b\"></div>"
+				+ "</a>" + "<div class=\"c\"></div>" + "</div>";
 
 		String expectedResult = "<div>" + "<div class=\"b\"></div>" + "<div class=\"c\"></div>" + "</div>";
 
-		assertEquals(expectedResult, stripUtils.peelElementsFromPageContent(pageContent, ElementType.div, "a"));
+		assertEquals(expectedResult, stripUtils.peelElementsFromPageContent(pageContent, ElementType.a, "image"));
 	}
 
 	@Test

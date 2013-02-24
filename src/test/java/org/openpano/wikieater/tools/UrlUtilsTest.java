@@ -73,7 +73,7 @@ public class UrlUtilsTest {
 		pageDataList.add(new PageData("http://x/b", "b.html", ""));
 
 		assertEquals("a.html", urlUtils.findHrefPageReplacement("/a",null, pageDataList));
-		assertEquals("http://some/c", urlUtils.findHrefPageReplacement("/c", "http://some/site", pageDataList));
+		assertEquals("http://some/c\" target=\"_BLANK", urlUtils.findHrefPageReplacement("/c", "http://some/site\"", pageDataList));
 	}
 
 	@Test

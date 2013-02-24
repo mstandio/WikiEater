@@ -57,7 +57,15 @@ public class UrlUtils extends MediaUtils {
 		if (href.matches(".+\\.css$|.+\\.jpg$|.+\\.jpeg$|.+\\.gif|.+\\.png|.+\\.bmp")) {
 			return href;
 		} else {
-			return makeMediaUrl(href, pageUrl);
+			return modifyExternalHref(makeMediaUrl(href, pageUrl));
+		}
+	}
+
+	String modifyExternalHref(String href) {
+		if (!href.matches("^http(s)?:.+")) {
+			return href;
+		} else {
+			return href + "\" target=\"_BLANK";
 		}
 	}
 

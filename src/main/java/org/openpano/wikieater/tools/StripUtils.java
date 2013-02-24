@@ -52,6 +52,7 @@ public class StripUtils {
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.span, "editsection");
 		pageContent = peelElementsFromPageContent(pageContent, ElementType.a, "image");
 		pageContent = cleanupPageContent(pageContent);
+		pageContent = pageContent.replaceAll("\t", "");
 		return pageContent;
 	}
 
@@ -179,7 +180,7 @@ public class StripUtils {
 	}
 
 	String peelElementsFromPageContent(String pageContent, ElementType elementType, String elementName) {
-		String patternTagOpen = "<" + elementType.name() + "[^>/]*>";
+		String patternTagOpen = "<" + elementType.name() + "[^>]*>";
 		String patternTagClose = "</" + elementType.name() + ">";
 
 		Pattern pattern = Pattern.compile(patternTagOpen + "|" + patternTagClose, Pattern.CASE_INSENSITIVE);

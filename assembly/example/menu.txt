@@ -1,0 +1,5 @@
+==Project tools==
+
+* [http://en.wikipedia.org/wiki/Build_automation Build automation]
+** [http://en.wikipedia.org/wiki/Apache_Ant Ant]
+** [http://en.wikipedia.org/wiki/Apache_Maven Maven] 

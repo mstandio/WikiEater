@@ -5,8 +5,8 @@
 	</formats>
 	<fileSets>
 		<fileSet>
-			<directory>assembly/sample</directory>
-			<outputDirectory></outputDirectory>
+			<directory>assembly/example</directory>
+			<outputDirectory>example</outputDirectory>
 			<includes>
 				<include>menu.txt</include>
 			</includes>

@@ -13,7 +13,7 @@ public class WikiEaterTask extends Task {
 	private String cachedir;
 	private String outputdir;
 	private String menufile;
-	private Boolean refreshcache;
+	private boolean refreshcache;
 
 	@Override
 	public void execute() throws BuildException {
@@ -44,7 +44,7 @@ public class WikiEaterTask extends Task {
 		this.menufile = menufile;
 	}
 
-	public Boolean getRefreshcache() {
+	public boolean getRefreshcache() {
 		return refreshcache;
 	}
 }
