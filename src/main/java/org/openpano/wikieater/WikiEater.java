@@ -98,12 +98,12 @@ public class WikiEater {
 		}
 
 		if (!menuFile.exists() || !menuFile.isFile()) {
-			throw new IllegalArgumentException("menu file is not valid: " + menuFile.getAbsolutePath());
+			throw new IllegalArgumentException("Menu file is not valid: " + menuFile.getAbsolutePath());
 		}
 
 		directoryCache.mkdir();
 		if (!directoryCache.exists() || !directoryCache.isDirectory()) {
-			throw new IllegalArgumentException("Directory is not valid: " + directoryCache.getAbsolutePath());
+			throw new IllegalArgumentException("Cache directory is not valid: " + directoryCache.getAbsolutePath());
 		}
 
 		directoryCacheResources.mkdir();
@@ -112,7 +112,7 @@ public class WikiEater {
 
 		directoryOutput.mkdir();
 		if (!directoryOutput.exists() || !directoryOutput.isDirectory()) {
-			throw new IllegalArgumentException("Directory is not valid: " + directoryOutput.getAbsolutePath());
+			throw new IllegalArgumentException("Output directory is not valid: " + directoryOutput.getAbsolutePath());
 		}
 
 		directoryOutputResources.mkdir();

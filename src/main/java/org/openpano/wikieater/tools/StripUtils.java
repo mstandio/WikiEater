@@ -15,15 +15,15 @@ public class StripUtils {
 	}
 
 	String getPageHeader(String pageContent) {
-		String patternTagOpen = "<[^>/]+/?>";
+		String patternTagOpen = "<[^/][^>]+/?>";
 		String patternTagClose = "</[^>]+>";
 		Pattern pattern = Pattern.compile(patternTagOpen + "|" + patternTagClose, Pattern.CASE_INSENSITIVE);
 		StringBuffer stringBuffer = new StringBuffer();
 		Matcher matcher = pattern.matcher(pageContent);
 		while (matcher.find()) {
-			String group = matcher.group().toLowerCase();
+			String group = matcher.group();
 			if (group.matches(patternTagOpen)) {
-				if (group.startsWith("<!doctype") || group.startsWith("<html") || group.startsWith("<head")
+				if (group.startsWith("<!DOCTYPE") || group.startsWith("<html") || group.startsWith("<head")
 						|| group.startsWith("<meta")) {
 					stringBuffer.append(group);
 				}
@@ -48,11 +48,14 @@ public class StripUtils {
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "footer");
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "magnify");
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "mw-head");
+		pageContent = removeElementsFromPageContent(pageContent, ElementType.div, "jump-to-nav");
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.table, "whos_here");
 		pageContent = removeElementsFromPageContent(pageContent, ElementType.span, "editsection");
 		pageContent = peelElementsFromPageContent(pageContent, ElementType.a, "image");
 		pageContent = cleanupPageContent(pageContent);
 		pageContent = pageContent.replaceAll("\t", "");
+		pageContent = pageContent.replaceAll("^$", "");
+		pageContent = pageContent.replaceAll("&nbsp;", "&#160;");
 		return pageContent;
 	}
 

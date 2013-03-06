@@ -293,6 +293,10 @@ public class FileUtils {
 
 	public void saveAsHtmlFile(PageData pageData, File outputDirecotry) throws IOException {
 		String pageContent = pageData.getPageContent();
+		String doctype = null;
+		if (pageContent.contains("<!DOCTYPE")) {
+			doctype = pageContent.substring(0, pageContent.indexOf(">") + 1);
+		}
 		try {
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -308,7 +312,6 @@ public class FileUtils {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			transformerFactory.setAttribute("indent-number", 4);
 			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 			transformer.setOutputProperty(OutputKeys.METHOD, "html");
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
@@ -316,7 +319,7 @@ public class FileUtils {
 			StreamResult streamResult = new StreamResult(stringWriter);
 			DOMSource domSource = new DOMSource(document);
 			transformer.transform(domSource, streamResult);
-			pageContent = stringWriter.toString();
+			pageContent = (doctype != null) ? doctype + "\n" + stringWriter.toString() : stringWriter.toString();
 
 		} catch (Exception e) {
 			logger.info("Could not format file '" + pageData.getHtmlFileName() + "', cause: " + e.getMessage());
